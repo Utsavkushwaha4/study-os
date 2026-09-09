@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyOS — Cloud Learning Platform</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            app: {
+              bg: '#080d1a',
+              card: '#0e172a',
+              border: '#1e293b',
+              textMuted: '#64748b',
+              textLight: '#94a3b8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-app-bg text-slate-100 min-h-screen font-sans antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- ================= 1. GATEWAY SCREEN (LOGIN FIRST VIEW) ================= -->
+  <section id="authGatewayView" class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-app-card border border-app-border rounded-3xl p-8 shadow-2xl text-center space-y-6 relative overflow-hidden">
+      
+      <!-- Top Decorative Accent -->
+      <div class="w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl absolute -top-10 -left-10 pointer-events-none"></div>
+      
+      <!-- Brand Logo -->
+      <div class="mx-auto w-14 h-14 rounded-2xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl font-bold shadow-lg shadow-emerald-500/10">
+        ⚡
+      </div>
+
+      <!-- Title & Subtitle -->
+      <div>
+        <h1 class="text-2xl font-black tracking-tight text-white">Study<span class="text-emerald-400">OS</span></h1>
+        <p class="text-xs text-app-textMuted mt-1.5 leading-relaxed">
+          Your cloud-synced, distraction-free personal study operating system.
+        </p>
+      </div>
+
+      <!-- Primary Action: Continue with Google -->
+      <div class="space-y-3 pt-2">
+        <button onclick="handleGoogleSignIn()" class="w-full py-3 px-4 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl flex items-center justify-center gap-2.5 shadow-lg transition duration-200">
+          <i class="fa-brands fa-google text-rose-500 text-sm"></i>
+          <span>Continue with Google</span>
+        </button>
+
+        <button onclick="continueAsGuest()" class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white font-semibold text-xs rounded-xl border border-app-border transition">
+          Continue as Guest (Local Only)
+        </button>
+      </div>
+
+      <div class="pt-4 border-t border-app-border/60 text-[11px] text-app-textMuted flex items-center justify-center gap-1.5 font-mono">
+        <i class="fa-solid fa-lock text-[10px] text-emerald-400"></i>
+        <span>Cross-device real-time sync enabled</span>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ================= 2. WORKSPACE DESK (SHOWS ONLY AFTER LOGIN) ================= -->
+  <div id="mainWorkspaceView" class="hidden max-w-3xl mx-auto px-4 py-8 space-y-8">
+
+    <!-- Header -->
+    <header class="flex items-center justify-between pb-6 border-b border-app-border">
+      <div class="flex items-center gap-3">
+        <div id="userAvatarContainer" class="w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold overflow-hidden">
+          ⚡
+        </div>
+        <div>
+          <h2 id="userDisplayName" class="text-sm font-bold text-white">My Desk</h2>
+          <p id="userEmailText" class="text-[10px] text-app-textMuted font-mono">Synced Mode</p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2">
+        <button onclick="openSelfStudyModal()" class="bg-app-card hover:bg-slate-800 text-slate-200 border border-app-border text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-stopwatch text-amber-400"></i>
+          <span>Self Study</span>
+        </button>
+
+        <button onclick="openAddCourseModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-lg shadow-emerald-600/25 transition">
+          <i class="fa-solid fa-plus text-xs"></i>
+          <span>Add Course</span>
+        </button>
+
+        <button onclick="handleSignOut()" class="w-8 h-8 rounded-xl bg-app-card border border-app-border text-slate-400 hover:text-rose-400 flex items-center justify-center text-xs transition" title="Logout">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- My Courses Section (Khali initially) -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-bold text-app-textMuted uppercase tracking-wider">Active Courses</h3>
+        <span id="coursesCount" class="text-xs font-mono text-app-textMuted">0 Courses</span>
+      </div>
+
+      <div id="coursesContainer" class="space-y-3">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- Today's Study History -->
+    <section class="bg-app-card border border-app-border rounded-2xl p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between border-b border-app-border pb-3">
+        <div>
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Today's Study History</h3>
+          <p class="text-[11px] text-app-textMuted">Completed focus sessions for today</p>
+        </div>
+        <div class="text-right">
+          <span id="totalStudyTimeToday" class="text-sm font-mono font-bold text-emerald-400">0 Mins</span>
+          <span class="block text-[10px] text-app-textMuted font-mono uppercase">Total Time</span>
+        </div>
+      </div>
+
+      <div id="historyList" class="space-y-2 pt-1">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+  </div>
+
+
+  <!-- ================= 3. FULL SCREEN ZERO-DISTRACTION FOCUS TIMER ================= -->
+  <div id="fullScreenFocus" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-between p-8 hidden select-none">
+    
+    <!-- Top Bar -->
+    <div class="text-center pt-8">
+      <span id="focusCategoryBadge" class="text-[11px] font-mono uppercase px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">
+        Course Focus
+      </span>
+      <h2 id="focusMainTitle" class="text-2xl md:text-3xl font-black text-white mt-3 tracking-wide">
+        Topic Name
+      </h2>
+    </div>
+
+    <!-- Huge Minimal Timer -->
+    <div class="text-center my-auto">
+      <div id="focusClock" class="text-7xl md:text-9xl font-mono font-black tracking-tight text-white drop-shadow-2xl">
+        25:00
+      </div>
+      <p id="focusSubState" class="text-xs font-mono text-slate-500 mt-2 tracking-widest uppercase">Deep Focus In Progress</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex items-center gap-3 pb-8">
+      <button id="focusPauseBtn" onclick="toggleFocusPause()" class="px-7 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-mono font-bold text-sm transition">
+        Pause
+      </button>
+      <button onclick="endFocusEarly()" class="px-7 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-sm shadow-xl shadow-emerald-600/30 transition">
+        Complete ✓
+      </button>
+      <button onclick="cancelFocusSession()" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950 text-slate-400 hover:text-rose-400 text-xs font-mono transition">
+        Cancel
+      </button>
+    </div>
+
+  </div>
+
+
+  <!-- ================= MODAL: ADD COURSE ================= -->
+  <div id="addCourseModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-app-card border border-app-border rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-2 border-b border-app-border">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wide">Create New Course</h3>
+        <button onclick="closeAddCourseModal()" class="text-app-textMuted hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-app-textLight mb-1 uppercase tracking-wider">Course Name</label>
+          <input id="modalCourseTitle" type="text" placeholder="e.g. Deep Learning & Neural Networks" class="w-full bg-slate-950 border border-app-border rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-app-border">
+          <label class="block text-[11px] font-bold text-app-textLight uppercase tracking-wider">Add Chapters (In Order)</label>
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <span id="modalTopicIndex" class="absolute left-3 top-2 text-xs font-mono font-bold text-emerald-400">1.</span>
+              <input id="modalTopicInput" type="text" placeholder="Chapter title..." onkeydown="if(event.key==='Enter') addModalTopic()" class="w-full bg-slate-950 border border-app-border rounded-xl pl-8 pr-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
+            </div>
+            <input id="modalTopicTime" type="number" value="30" class="w-16 bg-slate-950 border border-app-border rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none" title="Target Minutes" />
+            <button onclick="addModalTopic()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3 py-2 rounded-xl text-xs transition">Add</button>
+          </div>
+          <div id="modalTopicPreview" class="space-y-1.5 max-h-32 overflow-y-auto pt-1"></div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t border-app-border">
+        <button onclick="closeAddCourseModal()" class="px-4 py-2 bg-slate-900 text-app-textLight text-xs rounded-xl">Cancel</button>
+        <button onclick="saveNewCourse()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition">Save Course</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= MODAL: SELF STUDY ================= -->
+  <div id="selfStudyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-app-card border border-app-border rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center pb-2 border-b border-app-border">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wide">Self Study Session</h3>
+        <button onclick="closeSelfStudyModal()" class="text-app-textMuted hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-app-textLight mb-1 uppercase tracking-wider">Subject / Topic Name</label>
+          <input id="selfStudySubject" type="text" placeholder="e.g. LeetCode Practice / Reading" class="w-full bg-slate-950 border border-app-border rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-amber-500" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-app-textLight mb-1 uppercase tracking-wider">Duration (Minutes)</label>
+          <input id="selfStudyMinutes" type="number" value="30" class="w-full bg-slate-950 border border-app-border rounded-xl px-3.5 py-2 text-sm text-white font-mono focus:outline-none focus:border-amber-500" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeSelfStudyModal()" class="px-4 py-2 bg-slate-900 text-app-textLight text-xs rounded-xl">Cancel</button>
+        <button onclick="startSelfStudy()" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shadow transition">Start Focusing</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
