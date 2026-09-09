@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
   getAuth, 
-  signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider, 
   onAuthStateChanged, 
   signOut 
@@ -37,6 +38,19 @@ try {
   }
 } catch (e) {
   console.warn("Firebase running in offline-ready mode.");
+}
+
+// Handle redirect result on page load
+if (auth) {
+  getRedirectResult(auth)
+    .then((result) => {
+      if (result && result.user) {
+        currentUser = result.user;
+      }
+    })
+    .catch((err) => {
+      console.error("Redirect resolution error:", err);
+    });
 }
 
 // ================= 2. LOCAL STATE =================
@@ -77,13 +91,13 @@ function showView(screen) {
 
 window.handleGoogleSignIn = async function() {
   if (!auth) {
-    alert("Firebase Keys abhi default hain! Temporary Guest Mode chalu kar rahe hain taaki screen khul sake.");
+    alert("Firebase initialized nahi hai! Temporary Guest Mode chalu kar rahe hain.");
     window.continueAsGuest();
     return;
   }
+
   try {
-    const res = await signInWithPopup(auth, provider);
-    currentUser = res.user;
+    await signInWithRedirect(auth, provider);
   } catch (err) {
     console.error("Sign in failed:", err);
     alert("Login error: " + err.message);
@@ -136,14 +150,19 @@ if (auth) {
 
 function updateUserInterface() {
   if (!currentUser) return;
-  document.getElementById("userDisplayName").innerText = currentUser.displayName;
-  document.getElementById("userEmailText").innerText = currentUser.email;
+  const nameElem = document.getElementById("userDisplayName");
+  const emailElem = document.getElementById("userEmailText");
+  const avatarContainer = document.getElementById("userAvatarContainer");
 
-  const container = document.getElementById("userAvatarContainer");
-  if (currentUser.photoURL) {
-    container.innerHTML = `<img src="${currentUser.photoURL}" class="w-full h-full object-cover rounded-xl" />`;
-  } else {
-    container.innerHTML = `⚡`;
+  if (nameElem) nameElem.innerText = currentUser.displayName || "Scholar";
+  if (emailElem) emailElem.innerText = currentUser.email || "Synced Mode";
+
+  if (avatarContainer) {
+    if (currentUser.photoURL) {
+      avatarContainer.innerHTML = `<img src="${currentUser.photoURL}" class="w-full h-full object-cover rounded-xl" />`;
+    } else {
+      avatarContainer.innerHTML = `⚡`;
+    }
   }
 }
 
@@ -178,6 +197,7 @@ function renderWorkspace() {
 function renderCourses() {
   const container = document.getElementById("coursesContainer");
   const countBadge = document.getElementById("coursesCount");
+  if (!container || !countBadge) return;
   container.innerHTML = "";
 
   countBadge.innerText = `${appState.courses.length} Courses`;
@@ -219,7 +239,7 @@ function renderCourses() {
               </div>
               <div>
                 ${t.done ? '<span class="text-emerald-400 text-xs font-mono">Done ✓</span>' : `
-                  <button onclick="startCourseFocus('${course.id}', '${t.id}', '${t.name}', ${t.time})" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition">
+                  <button onclick="startCourseFocus('${course.id}', '${t.id}', '${t.name.replace(/'/g, "\\'")}', ${t.time})" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition cursor-pointer">
                     Start
                   </button>
                 `}
@@ -236,6 +256,8 @@ function renderCourses() {
 
 function renderHistory() {
   const container = document.getElementById("historyList");
+  const totalDisplay = document.getElementById("totalStudyTimeToday");
+  if (!container || !totalDisplay) return;
   container.innerHTML = "";
 
   const todayStr = new Date().toLocaleDateString();
@@ -243,7 +265,7 @@ function renderHistory() {
 
   let totalMins = 0;
   todayHistory.forEach(h => totalMins += h.duration);
-  document.getElementById("totalStudyTimeToday").innerText = `${totalMins} Mins`;
+  totalDisplay.innerText = `${totalMins} Mins`;
 
   if (todayHistory.length === 0) {
     container.innerHTML = `<p class="text-xs text-app-textMuted py-3 text-center">Aaj abhi tak koi session log nahi hua.</p>`;
@@ -428,7 +450,7 @@ function renderModalPreview() {
         <span class="text-white">${t.name}</span>
         <span class="text-[10px] text-slate-500 font-mono">(${t.time}m)</span>
       </div>
-      <button onclick="tempTopics.splice(${idx}, 1); renderModalPreview();" class="text-slate-500 hover:text-rose-400">
+      <button onclick="tempTopics.splice(${idx}, 1); renderModalPreview();" class="text-slate-500 hover:text-rose-400 cursor-pointer">
         <i class="fa-solid fa-xmark"></i>
       </button>
     `;
@@ -466,5 +488,5 @@ window.closeSelfStudyModal = function() {
   document.getElementById("selfStudyModal").classList.add("hidden");
 };
 
-// Initial state: Show Auth Gateway
+// Initial state
 showView("auth");
