@@ -36,11 +36,11 @@
     }
   </script>
 </head>
-<body class="bg-app-bg text-slate-100 min-h-screen font-sans antialiased selection:bg-emerald-500 selection:text-white">
+<body class="bg-app-bg text-slate-100 min-h-screen font-sans antialiased selection:bg-emerald-500 selection:text-white flex flex-col justify-between">
 
   <!-- ================= 1. GATEWAY SCREEN (LOGIN FIRST VIEW) ================= -->
-  <section id="authGatewayView" class="min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-app-card border border-app-border rounded-3xl p-8 shadow-2xl text-center space-y-6 relative overflow-hidden">
+  <section id="authGatewayView" class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="max-w-md w-full bg-app-card border border-app-border rounded-3xl p-8 shadow-2xl text-center space-y-6 relative overflow-hidden my-auto">
       
       <!-- Top Decorative Ambient Glow -->
       <div class="w-32 h-32 bg-sky-500/10 rounded-full blur-3xl absolute -top-10 -left-10 pointer-events-none"></div>
@@ -90,11 +90,16 @@
       </div>
 
     </div>
+
+    <!-- Gateway Footer Tag -->
+    <div class="py-6 text-center text-xs font-mono text-slate-500 select-none">
+      Made by <span class="font-bold text-slate-300 tracking-wide hover:text-sky-400 transition-colors">Utsav Kushwaha</span>
+    </div>
   </section>
 
 
   <!-- ================= 2. WORKSPACE DESK (SHOWS ONLY AFTER LOGIN) ================= -->
-  <div id="mainWorkspaceView" class="hidden max-w-3xl mx-auto px-4 py-8 space-y-8">
+  <div id="mainWorkspaceView" class="hidden max-w-3xl w-full mx-auto px-4 py-8 space-y-8 flex-1">
 
     <!-- Header / Navbar -->
     <header class="flex items-center justify-between pb-6 border-b border-app-border">
@@ -170,6 +175,13 @@
         <!-- Injected via JS -->
       </div>
     </section>
+
+    <!-- Workspace Bottom Signature -->
+    <footer class="pt-8 pb-4 text-center border-t border-app-border/40 select-none">
+      <p class="text-xs font-mono text-slate-500">
+        StudyOS • Made by <span class="font-bold text-slate-300 hover:text-emerald-400 transition-colors">Utsav Kushwaha</span>
+      </p>
+    </footer>
 
   </div>
 
