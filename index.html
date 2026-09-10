@@ -11,10 +11,10 @@
   <!-- External Custom CSS -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Tailwind CSS with Dark Mode Class Strategy -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 
@@ -49,21 +49,11 @@
   <div class="fixed bottom-0 right-0 w-96 h-96 bg-amber-200/30 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
 
-  <!-- ================= VIEW 1: AUTH GATEWAY (LOGIN FIRST) ================= -->
-  <section id="authGatewayView" class="w-full min-h-screen flex flex-col items-center justify-between p-5 relative z-10">
+  <!-- ================= VIEW 1: AUTH GATEWAY (NO FAKE NOTCH) ================= -->
+  <section id="authGatewayView" class="w-full min-h-screen flex flex-col items-center justify-center p-5 relative z-10">
     
-    <!-- Top Notch for Phone -->
-    <div class="w-full max-w-sm flex items-center justify-between pt-1 px-2 text-xs font-semibold text-slate-500 lg:hidden">
-      <span>9:30</span>
-      <div class="flex items-center gap-1.5 text-[11px]">
-        <i class="fa-solid fa-signal"></i>
-        <i class="fa-solid fa-wifi"></i>
-        <i class="fa-solid fa-battery-full text-xs"></i>
-      </div>
-    </div>
-
     <!-- Main Center Login Card -->
-    <div class="w-full max-w-sm my-auto py-6 space-y-6">
+    <div class="w-full max-w-sm my-auto py-4 space-y-6">
       
       <!-- Character / Badge Artwork -->
       <div class="text-center space-y-3">
@@ -118,8 +108,8 @@
   </section>
 
 
-  <!-- ================= VIEW 2: DESKTOP LEFT SIDEBAR (LARGE SCREENS) ================= -->
-  <aside id="desktopSidebar" class="hidden w-64 border-r border-slate-200 dark:border-app-borderDark bg-white/80 dark:bg-[#0d1527]/80 backdrop-blur-xl p-5 flex-col justify-between h-screen sticky top-0 z-30 flex-shrink-0">
+  <!-- ================= VIEW 2: DESKTOP LEFT SIDEBAR (STRICTLY HIDDEN ON PHONES) ================= -->
+  <aside id="desktopSidebar" class="hidden lg:flex w-64 border-r border-slate-200 dark:border-app-borderDark bg-white/80 dark:bg-[#0d1527]/80 backdrop-blur-xl p-5 flex-col justify-between h-screen sticky top-0 z-30 flex-shrink-0">
     <div class="space-y-6">
       <div class="flex items-center gap-3 px-1">
         <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
@@ -151,7 +141,7 @@
       </nav>
     </div>
 
-    <!-- User Profile Details & Logout in Sidebar -->
+    <!-- Desktop User Profile In Sidebar -->
     <div class="border-t border-slate-200 dark:border-app-borderDark pt-4 space-y-3">
       <div class="flex items-center justify-between px-1">
         <div class="flex items-center gap-2.5 min-w-0">
@@ -175,11 +165,11 @@
   </aside>
 
 
-  <!-- ================= VIEW 3: MAIN WORKSPACE DESK (RESPONSIVE) ================= -->
-  <main id="mainWorkspaceView" class="hidden flex-1 max-w-md lg:max-w-6xl mx-auto px-4 lg:px-8 pt-3 pb-28 lg:pb-12 space-y-5 relative z-10">
+  <!-- ================= VIEW 3: MAIN WORKSPACE ================= -->
+  <div id="mainWorkspaceView" class="hidden flex-1 w-full max-w-md lg:max-w-6xl mx-auto px-4 lg:px-8 pt-0 pb-28 lg:pb-12 relative z-10">
 
-    <!-- Mobile Top App Bar (< lg only) -->
-    <header class="flex items-center justify-between pb-1 lg:hidden">
+    <!-- Sticky Mobile App Bar (Screen scroll karne par stuck/pinned rahega) -->
+    <header class="sticky top-0 z-30 bg-slate-50/90 dark:bg-[#070b14]/90 backdrop-blur-md pt-3 pb-2.5 mb-3 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-800/50 lg:hidden">
       <div class="flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-sky-500/25">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -208,8 +198,8 @@
       </div>
     </header>
 
-    <!-- Desktop Top Utility Bar (lg+ only) -->
-    <header class="hidden lg:flex items-center justify-between pb-3 border-b border-slate-200 dark:border-app-borderDark">
+    <!-- Sticky Desktop Top Utility Bar (Large screens) -->
+    <header class="hidden lg:flex sticky top-0 z-30 bg-slate-50/90 dark:bg-[#070b14]/90 backdrop-blur-md pt-5 pb-3.5 mb-5 items-center justify-between border-b border-slate-200 dark:border-app-borderDark">
       <div>
         <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">AI Engineer Workspace</h2>
         <p class="text-xs text-slate-400 mt-0.5">Track your curriculum, focus sessions, and chapter progress</p>
@@ -231,143 +221,134 @@
       </div>
     </header>
 
-    <!-- Hero Greeting & Today's Focus (Grid $2:1$ on Desktop, Stack on Mobile) -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <!-- Greeting Banner -->
-      <div class="lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-100 dark:from-[#0d1e38] dark:via-[#0c2642] dark:to-[#0f304d] border border-teal-100 dark:border-slate-700 p-4.5 p-4 sm:p-6 flex items-center justify-between shadow-sm">
-        <div class="space-y-1 relative z-10">
-          <h2 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            <span id="heroGreetingText">Good Evening</span>, <span id="dashUserName" class="text-teal-600 dark:text-sky-400">Scholar</span> 👋
-          </h2>
-          <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 max-w-md font-medium leading-relaxed">
-            Keep going! Your future AI Engineer self will thank you. Every focused session counts.
-          </p>
-        </div>
+    <div class="space-y-5">
+      <!-- Hero Greeting & Today's Focus -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Greeting Banner -->
+        <div class="lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-100 dark:from-[#0d1e38] dark:via-[#0c2642] dark:to-[#0f304d] border border-teal-100 dark:border-slate-700 p-4.5 p-4 sm:p-6 flex items-center justify-between shadow-sm">
+          <div class="space-y-1 relative z-10">
+            <h2 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              <span id="heroGreetingText">Good Evening</span>, <span id="dashUserName" class="text-teal-600 dark:text-sky-400">Scholar</span> 👋
+            </h2>
+            <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 max-w-md font-medium leading-relaxed">
+              Keep going! Your future AI Engineer self will thank you. Every focused session counts.
+            </p>
+          </div>
 
-        <div class="relative w-20 sm:w-28 h-16 sm:h-24 flex items-center justify-center flex-shrink-0 select-none">
-          <span class="text-5xl sm:text-6xl">👨‍💻</span>
-          <div class="absolute -top-1 -right-1 bg-white/90 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded-lg shadow-sm text-[8px] sm:text-[9px] font-bold text-teal-600 dark:text-teal-400">
-            Better Daily ✨
+          <div class="relative w-20 sm:w-28 h-16 sm:h-24 flex items-center justify-center flex-shrink-0 select-none">
+            <span class="text-5xl sm:text-6xl">👨‍💻</span>
+            <div class="absolute -top-1 -right-1 bg-white/90 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded-lg shadow-sm text-[8px] sm:text-[9px] font-bold text-teal-600 dark:text-teal-400">
+              Better Daily ✨
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Today's Focus Action Pill -->
-      <div onclick="openSelfStudyModal()" class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-3xl p-4 sm:p-5 flex items-center justify-between lg:flex-col lg:justify-between shadow-sm cursor-pointer hover:border-pink-300 dark:hover:border-pink-500 transition group">
-        <div class="flex items-center gap-3 lg:w-full">
-          <div class="w-11 h-11 rounded-2xl bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-900/60 flex items-center justify-center text-pink-500 text-lg shadow-sm flex-shrink-0">
-            <i class="fa-solid fa-bullseye"></i>
+        <!-- Today's Focus Action Pill -->
+        <div onclick="openSelfStudyModal()" class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-3xl p-4 sm:p-5 flex items-center justify-between lg:flex-col lg:justify-between shadow-sm cursor-pointer hover:border-pink-300 dark:hover:border-pink-500 transition group">
+          <div class="flex items-center gap-3 lg:w-full">
+            <div class="w-11 h-11 rounded-2xl bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-900/60 flex items-center justify-center text-pink-500 text-lg shadow-sm flex-shrink-0">
+              <i class="fa-solid fa-bullseye"></i>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Today's Focus</span>
+              <h4 id="activeFocusTitle" class="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-white group-hover:text-pink-500 transition">Self Study Focus</h4>
+            </div>
           </div>
+          <div class="w-7 h-7 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-xs lg:hidden">
+            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+          </div>
+          <div class="hidden lg:flex w-full pt-2 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-xs font-bold text-pink-500">
+            <span>Start Focus Timer</span>
+            <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- Four Side-by-Side KPI Metrics -->
+      <section class="grid grid-cols-4 gap-2 sm:gap-3.5">
+        <div class="bg-amber-50/70 dark:bg-[#1a1711] border border-amber-200/70 dark:border-amber-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
+          <div class="flex items-center gap-1 text-amber-500">
+            <i class="fa-solid fa-fire text-xs"></i>
+            <span id="kpiStreakDays" class="text-xs sm:text-sm font-black font-mono">1 d</span>
+          </div>
+          <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Study Streak</span>
+        </div>
+
+        <div class="bg-sky-50/70 dark:bg-[#0c1b2c] border border-sky-200/70 dark:border-sky-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
+          <div class="flex items-center gap-1 text-sky-500">
+            <i class="fa-regular fa-clock text-xs"></i>
+            <span id="kpiTodayStudyTime" class="text-xs sm:text-sm font-black font-mono">0m</span>
+          </div>
+          <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Today Time</span>
+        </div>
+
+        <div class="bg-emerald-50/70 dark:bg-[#0d2218] border border-emerald-200/70 dark:border-emerald-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
+          <div class="flex items-center gap-1 text-emerald-500">
+            <i class="fa-solid fa-chart-pie text-xs"></i>
+            <span id="kpiProgressPct" class="text-xs sm:text-sm font-black font-mono">0%</span>
+          </div>
+          <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Progress</span>
+        </div>
+
+        <div class="bg-indigo-50/70 dark:bg-[#15142a] border border-indigo-200/70 dark:border-indigo-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
+          <div class="flex items-center gap-1 text-indigo-500">
+            <i class="fa-regular fa-circle-check text-xs"></i>
+            <span id="kpiCompletedTasksCount" class="text-xs sm:text-sm font-black font-mono">0 / 0</span>
+          </div>
+          <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Tasks Done</span>
+        </div>
+      </section>
+
+      <!-- Weekly Calendar Strip -->
+      <section class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-2xl p-3.5 space-y-2.5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-lg bg-sky-50 dark:bg-sky-950 flex items-center justify-center text-sky-500 text-xs">
+              <i class="fa-regular fa-calendar"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-800 dark:text-white leading-none">Weekly Calendar</h4>
+              <span class="text-[9px] text-slate-400">Keep up your daily consistency!</span>
+            </div>
+          </div>
+          <span id="calendarCurrentMonth" class="text-[10px] font-mono font-bold text-sky-500">This Week</span>
+        </div>
+
+        <div id="weeklyCalendarRow" class="grid grid-cols-7 gap-1.5 sm:gap-2.5 text-center select-none pt-1"></div>
+      </section>
+
+      <!-- Active Courses -->
+      <section class="space-y-3">
+        <div class="flex items-center justify-between px-1">
           <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Today's Focus</span>
-            <h4 id="activeFocusTitle" class="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-white group-hover:text-pink-500 transition">Self Study Focus</h4>
+            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">Your Courses</h3>
+            <p class="text-[10px] text-slate-400">Click to expand chapters and start focus session</p>
           </div>
+          <button onclick="openAddCourseModal()" class="text-xs font-bold text-sky-500 hover:text-sky-600 flex items-center gap-1 cursor-pointer">
+            <span>+ Add Course</span>
+          </button>
         </div>
-        <div class="w-7 h-7 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-xs lg:hidden">
-          <i class="fa-solid fa-chevron-right text-[10px]"></i>
-        </div>
-        <div class="hidden lg:flex w-full pt-2 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-xs font-bold text-pink-500">
-          <span>Start Focus Timer</span>
-          <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </div>
-    </section>
 
-    <!-- Four Side-by-Side KPI Metrics (Compact 4-Column on Mobile & Desktop) -->
-    <section class="grid grid-cols-4 gap-2 sm:gap-3.5">
-      <!-- 1. Streak -->
-      <div class="bg-amber-50/70 dark:bg-[#1a1711] border border-amber-200/70 dark:border-amber-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
-        <div class="flex items-center gap-1 text-amber-500">
-          <i class="fa-solid fa-fire text-xs"></i>
-          <span id="kpiStreakDays" class="text-xs sm:text-sm font-black font-mono">1 d</span>
-        </div>
-        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Study Streak</span>
-      </div>
+        <div id="coursesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"></div>
+      </section>
 
-      <!-- 2. Focus Time -->
-      <div class="bg-sky-50/70 dark:bg-[#0c1b2c] border border-sky-200/70 dark:border-sky-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
-        <div class="flex items-center gap-1 text-sky-500">
-          <i class="fa-regular fa-clock text-xs"></i>
-          <span id="kpiTodayStudyTime" class="text-xs sm:text-sm font-black font-mono">0m</span>
-        </div>
-        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Today Time</span>
-      </div>
-
-      <!-- 3. Progress -->
-      <div class="bg-emerald-50/70 dark:bg-[#0d2218] border border-emerald-200/70 dark:border-emerald-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
-        <div class="flex items-center gap-1 text-emerald-500">
-          <i class="fa-solid fa-chart-pie text-xs"></i>
-          <span id="kpiProgressPct" class="text-xs sm:text-sm font-black font-mono">0%</span>
-        </div>
-        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Progress</span>
-      </div>
-
-      <!-- 4. Tasks -->
-      <div class="bg-indigo-50/70 dark:bg-[#15142a] border border-indigo-200/70 dark:border-indigo-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
-        <div class="flex items-center gap-1 text-indigo-500">
-          <i class="fa-regular fa-circle-check text-xs"></i>
-          <span id="kpiCompletedTasksCount" class="text-xs sm:text-sm font-black font-mono">0 / 0</span>
-        </div>
-        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Tasks Done</span>
-      </div>
-    </section>
-
-    <!-- Weekly Calendar Consistency Strip -->
-    <section class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-2xl p-3.5 space-y-2.5 shadow-sm">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="w-6 h-6 rounded-lg bg-sky-50 dark:bg-sky-950 flex items-center justify-center text-sky-500 text-xs">
-            <i class="fa-regular fa-calendar"></i>
-          </div>
+      <!-- History Feed -->
+      <section class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-2xl p-4 shadow-sm space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <h4 class="text-xs font-bold text-slate-800 dark:text-white leading-none">Weekly Calendar</h4>
-            <span class="text-[9px] text-slate-400">Keep up your daily consistency!</span>
+            <h4 class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Today's Study History</h4>
+            <p class="text-[10px] text-slate-400">Completed sessions logged today</p>
           </div>
+          <span id="totalStudyTimeToday" class="text-xs font-mono font-bold text-emerald-500">0 Mins</span>
         </div>
-        <span id="calendarCurrentMonth" class="text-[10px] font-mono font-bold text-sky-500">This Week</span>
-      </div>
+        <div id="historyList" class="space-y-2 pt-1"></div>
+      </section>
+    </div>
 
-      <div id="weeklyCalendarRow" class="grid grid-cols-7 gap-1.5 sm:gap-2.5 text-center select-none pt-1">
-        <!-- Dynamically Rendered by JS -->
-      </div>
-    </section>
-
-    <!-- Active Courses Grid -->
-    <section class="space-y-3">
-      <div class="flex items-center justify-between px-1">
-        <div>
-          <h3 class="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">Your Courses</h3>
-          <p class="text-[10px] text-slate-400">Click to expand chapters and start focus session</p>
-        </div>
-        <button onclick="openAddCourseModal()" class="text-xs font-bold text-sky-500 hover:text-sky-600 flex items-center gap-1 cursor-pointer">
-          <span>+ Add Course</span>
-        </button>
-      </div>
-
-      <!-- Mobile: 1-col | Desktop: 3-col Grid -->
-      <div id="coursesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-        <!-- Dynamically injected via JS -->
-      </div>
-    </section>
-
-    <!-- History / Sessions Feed -->
-    <section class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-2xl p-4 shadow-sm space-y-3">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-        <div>
-          <h4 class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Today's Study History</h4>
-          <p class="text-[10px] text-slate-400">Completed sessions logged today</p>
-        </div>
-        <span id="totalStudyTimeToday" class="text-xs font-mono font-bold text-emerald-500">0 Mins</span>
-      </div>
-      <div id="historyList" class="space-y-2 pt-1">
-        <!-- Injected via JS -->
-      </div>
-    </section>
-
-  </main>
+  </div>
 
 
-  <!-- ================= FIXED BOTTOM NATIVE TASKBAR (MOBILE ONLY) ================= -->
+  <!-- ================= FIXED BOTTOM TASKBAR (MOBILE ONLY) ================= -->
   <nav id="bottomTaskbar" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 max-w-md mx-auto py-2 px-6 items-center justify-between shadow-2xl lg:hidden">
     <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center gap-1 text-sky-500 font-bold cursor-pointer">
       <div class="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-950 flex items-center justify-center text-sm">

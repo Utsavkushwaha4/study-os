@@ -35,17 +35,16 @@ try {
     auth = getAuth(app);
     db = getFirestore(app);
     provider = new GoogleAuthProvider();
-    // 1-Tap Google Account Chooser
     provider.setCustomParameters({
       prompt: 'select_account'
     });
   }
 } catch (e) {
-  console.warn("Firebase offline-ready mode active.");
+  console.warn("Firebase running in offline mode.");
 }
 
 // ================= 2. LOCAL STATE =================
-const STORAGE_KEY = "study_os_app_state_v3";
+const STORAGE_KEY = "study_os_app_state_v4";
 
 let appState = {
   courses: [
@@ -76,7 +75,7 @@ let appState = {
       topics: [
         { id: "t_31", name: "Linear Algebra & Vectors", time: 40, done: false },
         { id: "t_32", name: "Gradient Descent & Backprop", time: 45, done: false },
-        { id: "t_33", name: "Transformers & Attention Mechanism", time: 60, done: false },
+        { id: "t_33", name: "Transformers & Attention", time: 60, done: false },
         { id: "t_34", name: "RAG & Vector Embeddings", time: 50, done: false }
       ]
     }
@@ -107,7 +106,6 @@ let currentSession = {
   isPaused: false
 };
 
-// Course styling themes mimicking the pastel app cards
 const courseThemes = [
   {
     lightBg: "bg-emerald-50/60",
@@ -171,25 +169,20 @@ function applyTheme(theme) {
   localStorage.setItem('studyos_theme', theme);
 }
 
-// ================= 4. AUTH & VIEW SWITCHER =================
+// ================= 4. AUTH & SCREEN ROUTING (FIXED) =================
 function showView(screen) {
   const authView = document.getElementById("authGatewayView");
   const workspaceView = document.getElementById("mainWorkspaceView");
   const bottomBar = document.getElementById("bottomTaskbar");
-  const desktopSidebar = document.getElementById("desktopSidebar");
 
   if (screen === "workspace") {
     authView.classList.add("hidden");
     workspaceView.classList.remove("hidden");
     
-    // Show Mobile bottom bar on phone view, desktop sidebar on large screen
+    // Show bottom taskbar on phone view only
     if (bottomBar) {
       bottomBar.classList.remove("hidden");
       bottomBar.classList.add("flex");
-    }
-    if (desktopSidebar) {
-      desktopSidebar.classList.remove("hidden");
-      desktopSidebar.classList.add("lg:flex");
     }
 
     updateGreeting();
@@ -201,17 +194,13 @@ function showView(screen) {
       bottomBar.classList.add("hidden");
       bottomBar.classList.remove("flex");
     }
-    if (desktopSidebar) {
-      desktopSidebar.classList.add("hidden");
-      desktopSidebar.classList.remove("lg:flex");
-    }
     authView.classList.remove("hidden");
   }
 }
 
 window.handleGoogleSignIn = async function() {
   if (!auth) {
-    alert("Firebase config offline mode mein hai! Temporary Guest mode chalaya ja raha hai.");
+    alert("Firebase initialized nahi hai! Guest Mode chalu kar rahe hain.");
     window.continueAsGuest();
     return;
   }
@@ -226,7 +215,7 @@ window.handleGoogleSignIn = async function() {
     showView("workspace");
   } catch (err) {
     if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") {
-      console.warn("Login window was closed.");
+      console.warn("Login window closed.");
     } else {
       console.error("Login failed:", err);
       alert("Login error: " + err.message);
@@ -322,7 +311,7 @@ function renderWeeklyCalendar() {
   container.innerHTML = "";
 
   const today = new Date();
-  const currentDayOfWeek = today.getDay(); // 0 (Sun) to 6 (Sat)
+  const currentDayOfWeek = today.getDay();
   const monthName = today.toLocaleString('default', { month: 'short', year: 'numeric' });
   
   const monthElem = document.getElementById("calendarCurrentMonth");
@@ -330,7 +319,6 @@ function renderWeeklyCalendar() {
 
   const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  // Compute Sunday of this current week
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - currentDayOfWeek);
 
@@ -388,7 +376,6 @@ function renderWorkspace() {
 }
 
 function renderMetrics() {
-  // Overall Progress
   let totalChs = 0;
   let doneChs = 0;
   appState.courses.forEach(c => {
@@ -400,12 +387,10 @@ function renderMetrics() {
   const pctElem = document.getElementById("kpiProgressPct");
   if (pctElem) pctElem.innerText = `${pct}%`;
 
-  // Streak
   const streak = appState.streak || { current: 2, best: 5 };
   const streakElem = document.getElementById("kpiStreakDays");
   if (streakElem) streakElem.innerText = `${streak.current} d`;
 
-  // Today's Study Time
   const todayStr = new Date().toLocaleDateString();
   const todaySessions = appState.history.filter(h => h.date === todayStr);
   let totalMinutes = 0;
@@ -418,7 +403,6 @@ function renderMetrics() {
   const timeElem = document.getElementById("kpiTodayStudyTime");
   if (timeElem) timeElem.innerText = timeFormatted;
 
-  // Completed Tasks
   const tasks = appState.dailyTasks || [];
   const completed = tasks.filter(t => t.done).length;
   const tasksElem = document.getElementById("kpiCompletedTasksCount");
@@ -434,7 +418,7 @@ function renderCourses() {
     container.className = "col-span-full";
     container.innerHTML = `
       <div class="text-center py-10 border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl w-full">
-        <p class="text-xs text-slate-400">Abhi koi course nahi hai. Upar "+ Add Course" se chapter shuru karein!</p>
+        <p class="text-xs text-slate-400">Abhi koi course nahi hai. Upar "+ Add Course" se shuru karein!</p>
       </div>
     `;
     return;
@@ -754,7 +738,7 @@ window.closeSelfStudyModal = function() {
   document.getElementById("selfStudyModal").classList.add("hidden");
 };
 
-// Apply saved theme & initial gateway view
+// Initial Theme & Screen state
 const savedTheme = localStorage.getItem('studyos_theme') || 'light';
 applyTheme(savedTheme);
 showView("auth");
