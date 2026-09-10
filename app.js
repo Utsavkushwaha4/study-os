@@ -44,7 +44,7 @@ try {
 }
 
 // ================= 2. LOCAL STATE =================
-const STORAGE_KEY = "study_os_app_state_v4";
+const STORAGE_KEY = "study_os_app_state_v5";
 
 let appState = {
   courses: [
@@ -105,6 +105,12 @@ let currentSession = {
   intervalId: null,
   isPaused: false
 };
+
+// Strict Safeguards Variables
+let wakeLockSentinel = null;
+let audioCtx = null;
+let noiseSource = null;
+let isAudioPlaying = false;
 
 const courseThemes = [
   {
@@ -169,7 +175,7 @@ function applyTheme(theme) {
   localStorage.setItem('studyos_theme', theme);
 }
 
-// ================= 4. AUTH & SCREEN ROUTING (FIXED) =================
+// ================= 4. AUTH & SCREEN ROUTING =================
 function showView(screen) {
   const authView = document.getElementById("authGatewayView");
   const workspaceView = document.getElementById("mainWorkspaceView");
@@ -179,7 +185,6 @@ function showView(screen) {
     authView.classList.add("hidden");
     workspaceView.classList.remove("hidden");
     
-    // Show bottom taskbar on phone view only
     if (bottomBar) {
       bottomBar.classList.remove("hidden");
       bottomBar.classList.add("flex");
@@ -318,7 +323,6 @@ function renderWeeklyCalendar() {
   if (monthElem) monthElem.innerText = monthName;
 
   const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - currentDayOfWeek);
 
@@ -538,7 +542,7 @@ window.closeCourseDrawer = function() {
   document.getElementById("courseDrawerModal").classList.add("hidden");
 };
 
-// ================= 9. FOCUS TIMER ENGINE =================
+// ================= 9. STRICT FOCUS ENGINE & SAFEGUARDS =================
 window.startCourseFocus = function(courseId, topicId, title, minutes) {
   currentSession = {
     courseId,
@@ -576,6 +580,7 @@ function launchFullScreen() {
   document.getElementById("mainWorkspaceView").classList.add("hidden");
   document.getElementById("bottomTaskbar").classList.add("hidden");
   document.getElementById("fullScreenFocus").classList.remove("hidden");
+  document.getElementById("cheatWarningBanner").classList.add("hidden");
 
   document.getElementById("focusCategoryBadge").innerText = currentSession.category;
   document.getElementById("focusMainTitle").innerText = currentSession.title;
@@ -583,6 +588,12 @@ function launchFullScreen() {
   document.getElementById("focusSubState").innerText = "Deep Focus In Progress";
 
   updateClockDisplay();
+  requestScreenWakeLock();
+
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  }
+
   if (currentSession.intervalId) clearInterval(currentSession.intervalId);
   currentSession.intervalId = setInterval(tickFocusClock, 1000);
 }
@@ -594,7 +605,7 @@ function tickFocusClock() {
   } else {
     clearInterval(currentSession.intervalId);
     logSessionComplete();
-    alert(`Session completed: ${currentSession.title}!`);
+    alert(`Congratulations! Session completed: ${currentSession.title}`);
     exitFullScreen();
   }
 }
@@ -605,6 +616,21 @@ function updateClockDisplay() {
   document.getElementById("focusClock").innerText = `${m}:${s}`;
 }
 
+// 1. Tab Visibility Cheat Detector
+document.addEventListener("visibilitychange", () => {
+  const focusModal = document.getElementById("fullScreenFocus");
+  if (document.hidden && !focusModal.classList.contains("hidden") && !currentSession.isPaused) {
+    // Distraction detected: Auto-pause
+    currentSession.isPaused = true;
+    clearInterval(currentSession.intervalId);
+    releaseScreenWakeLock();
+    
+    document.getElementById("cheatWarningBanner").classList.remove("hidden");
+    document.getElementById("focusPauseBtn").innerText = "Resume";
+    document.getElementById("focusSubState").innerText = "Session Paused (Distracted)";
+  }
+});
+
 window.toggleFocusPause = function() {
   const btn = document.getElementById("focusPauseBtn");
   const sub = document.getElementById("focusSubState");
@@ -613,11 +639,14 @@ window.toggleFocusPause = function() {
     currentSession.isPaused = false;
     btn.innerText = "Pause";
     sub.innerText = "Deep Focus In Progress";
+    document.getElementById("cheatWarningBanner").classList.add("hidden");
+    requestScreenWakeLock();
     currentSession.intervalId = setInterval(tickFocusClock, 1000);
   } else {
     currentSession.isPaused = true;
-    btn.innerText = "Continue";
+    btn.innerText = "Resume";
     sub.innerText = "Session Paused";
+    releaseScreenWakeLock();
     clearInterval(currentSession.intervalId);
   }
 };
@@ -629,7 +658,7 @@ window.endFocusEarly = function() {
 };
 
 window.cancelFocusSession = function() {
-  if (confirm("Cancel focus session? Data will not be saved.")) {
+  if (confirm("Cancel focus session? Progress will not be saved.")) {
     clearInterval(currentSession.intervalId);
     exitFullScreen();
   }
@@ -639,7 +668,92 @@ function exitFullScreen() {
   document.getElementById("fullScreenFocus").classList.add("hidden");
   document.getElementById("mainWorkspaceView").classList.remove("hidden");
   document.getElementById("bottomTaskbar").classList.remove("hidden");
+  
+  releaseScreenWakeLock();
+  stopAmbientNoise();
+
+  if (document.fullscreenElement && document.exitFullscreen) {
+    document.exitFullscreen().catch(() => {});
+  }
+
   renderWorkspace();
+}
+
+// 2. Screen Wake Lock API
+async function requestScreenWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLockSentinel = await navigator.wakeLock.request('screen');
+      const badge = document.getElementById("wakeLockStatus");
+      if (badge) badge.innerText = "Screen Lock: Active 💡";
+    }
+  } catch (err) {
+    console.warn("WakeLock request error:", err.message);
+  }
+}
+
+function releaseScreenWakeLock() {
+  if (wakeLockSentinel) {
+    wakeLockSentinel.release().then(() => {
+      wakeLockSentinel = null;
+      const badge = document.getElementById("wakeLockStatus");
+      if (badge) badge.innerText = "Screen Lock: Idle";
+    });
+  }
+}
+
+// 3. Web Audio API Ambient White Noise
+window.toggleSoundEngine = function() {
+  if (!isAudioPlaying) {
+    startAmbientNoise();
+  } else {
+    stopAmbientNoise();
+  }
+};
+
+function startAmbientNoise() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const bufferSize = audioCtx.sampleRate * 2;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+    noiseSource = audioCtx.createBufferSource();
+    noiseSource.buffer = buffer;
+    noiseSource.loop = true;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 350; // Soothing binaural rain tone
+
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+
+    noiseSource.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    noiseSource.start();
+
+    isAudioPlaying = true;
+    document.getElementById("soundIcon").className = "fa-solid fa-volume-high text-emerald-400";
+    document.getElementById("soundLabel").innerText = "Audio On";
+  } catch (e) {
+    console.warn("Audio Context error:", e);
+  }
+}
+
+function stopAmbientNoise() {
+  if (noiseSource) {
+    noiseSource.stop();
+    noiseSource.disconnect();
+    noiseSource = null;
+  }
+  isAudioPlaying = false;
+  const icon = document.getElementById("soundIcon");
+  const label = document.getElementById("soundLabel");
+  if (icon) icon.className = "fa-solid fa-volume-xmark";
+  if (label) label.innerText = "Audio Off";
 }
 
 function logSessionComplete() {
@@ -738,7 +852,7 @@ window.closeSelfStudyModal = function() {
   document.getElementById("selfStudyModal").classList.add("hidden");
 };
 
-// Initial Theme & Screen state
+// Initial Theme & Screen routing
 const savedTheme = localStorage.getItem('studyos_theme') || 'light';
 applyTheme(savedTheme);
 showView("auth");
