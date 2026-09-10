@@ -44,7 +44,7 @@ try {
 }
 
 // ================= 2. LOCAL STATE =================
-const STORAGE_KEY = "study_os_app_state_v5";
+const STORAGE_KEY = "study_os_app_state_v6";
 
 let appState = {
   courses: [
@@ -106,7 +106,6 @@ let currentSession = {
   isPaused: false
 };
 
-// Strict Safeguards Variables
 let wakeLockSentinel = null;
 let audioCtx = null;
 let noiseSource = null;
@@ -175,16 +174,24 @@ function applyTheme(theme) {
   localStorage.setItem('studyos_theme', theme);
 }
 
-// ================= 4. AUTH & SCREEN ROUTING =================
+// ================= 4. AUTH & SCREEN ROUTING (FIXED PC SIDEBAR BUG) =================
 function showView(screen) {
   const authView = document.getElementById("authGatewayView");
   const workspaceView = document.getElementById("mainWorkspaceView");
   const bottomBar = document.getElementById("bottomTaskbar");
+  const desktopSidebar = document.getElementById("desktopSidebar");
 
   if (screen === "workspace") {
     authView.classList.add("hidden");
     workspaceView.classList.remove("hidden");
     
+    // Show sidebar ONLY AFTER login on laptop/desktop
+    if (desktopSidebar) {
+      desktopSidebar.classList.remove("hidden");
+      desktopSidebar.classList.add("lg:flex");
+    }
+
+    // Show mobile taskbar ONLY AFTER login on mobile
     if (bottomBar) {
       bottomBar.classList.remove("hidden");
       bottomBar.classList.add("flex");
@@ -195,10 +202,19 @@ function showView(screen) {
     renderWorkspace();
   } else {
     workspaceView.classList.add("hidden");
+    
+    // Strictly hide desktop sidebar on login screen
+    if (desktopSidebar) {
+      desktopSidebar.classList.add("hidden");
+      desktopSidebar.classList.remove("lg:flex");
+    }
+
+    // Strictly hide mobile taskbar on login screen
     if (bottomBar) {
       bottomBar.classList.add("hidden");
       bottomBar.classList.remove("flex");
     }
+
     authView.classList.remove("hidden");
   }
 }
@@ -616,11 +632,10 @@ function updateClockDisplay() {
   document.getElementById("focusClock").innerText = `${m}:${s}`;
 }
 
-// 1. Tab Visibility Cheat Detector
+// Tab Visibility Cheat Detector
 document.addEventListener("visibilitychange", () => {
   const focusModal = document.getElementById("fullScreenFocus");
   if (document.hidden && !focusModal.classList.contains("hidden") && !currentSession.isPaused) {
-    // Distraction detected: Auto-pause
     currentSession.isPaused = true;
     clearInterval(currentSession.intervalId);
     releaseScreenWakeLock();
@@ -679,7 +694,7 @@ function exitFullScreen() {
   renderWorkspace();
 }
 
-// 2. Screen Wake Lock API
+// Screen Wake Lock
 async function requestScreenWakeLock() {
   try {
     if ('wakeLock' in navigator) {
@@ -702,7 +717,7 @@ function releaseScreenWakeLock() {
   }
 }
 
-// 3. Web Audio API Ambient White Noise
+// Web Audio Ambient Noise
 window.toggleSoundEngine = function() {
   if (!isAudioPlaying) {
     startAmbientNoise();
@@ -725,7 +740,7 @@ function startAmbientNoise() {
 
     const filter = audioCtx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.value = 350; // Soothing binaural rain tone
+    filter.frequency.value = 350;
 
     const gain = audioCtx.createGain();
     gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
