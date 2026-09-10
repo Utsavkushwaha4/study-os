@@ -17,6 +17,16 @@
   background: #080d1a;
 }
 
+/* Hide Scrollbar for Horizontal Swipe Container (Mobile Metric Cards) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
 /* Card Glow Effect on Hover */
 .course-card-glow:hover {
   border-color: rgba(59, 130, 246, 0.4);
