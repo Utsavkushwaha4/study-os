@@ -35,24 +35,58 @@ try {
     auth = getAuth(app);
     db = getFirestore(app);
     provider = new GoogleAuthProvider();
+    // 1-Tap Google Account Chooser
     provider.setCustomParameters({
       prompt: 'select_account'
     });
   }
 } catch (e) {
-  console.warn("Firebase running in offline-ready mode.");
+  console.warn("Firebase offline-ready mode active.");
 }
 
 // ================= 2. LOCAL STATE =================
-const STORAGE_KEY = "study_os_login_first_data_v2";
+const STORAGE_KEY = "study_os_app_state_v3";
 
 let appState = {
-  courses: [],
+  courses: [
+    {
+      id: "c_1",
+      name: "Creative Sketching",
+      topics: [
+        { id: "t_11", name: "Pencil Gradients & Shading", time: 30, done: true },
+        { id: "t_12", name: "Perspective Drawing Basics", time: 35, done: true },
+        { id: "t_13", name: "Anatomy of Faces", time: 40, done: false },
+        { id: "t_14", name: "Digital Line Art", time: 30, done: false },
+        { id: "t_15", name: "Color Theory & Lighting", time: 45, done: false }
+      ]
+    },
+    {
+      id: "c_2",
+      name: "Web Development",
+      topics: [
+        { id: "t_21", name: "Semantic HTML & Accessibility", time: 30, done: true },
+        { id: "t_22", name: "Tailwind CSS Layout Mastery", time: 45, done: false },
+        { id: "t_23", name: "Modern JS DOM & Async", time: 45, done: false },
+        { id: "t_24", name: "Full-Stack API Integrations", time: 60, done: false }
+      ]
+    },
+    {
+      id: "c_3",
+      name: "AI & Machine Learning",
+      topics: [
+        { id: "t_31", name: "Linear Algebra & Vectors", time: 40, done: false },
+        { id: "t_32", name: "Gradient Descent & Backprop", time: 45, done: false },
+        { id: "t_33", name: "Transformers & Attention Mechanism", time: 60, done: false },
+        { id: "t_34", name: "RAG & Vector Embeddings", time: 50, done: false }
+      ]
+    }
+  ],
   history: [],
   dailyTasks: [
-    { id: "t_sample_1", title: "Complete Python OOP Chapter", done: false },
-    { id: "t_sample_2", title: "Review 15 ML Equations", done: false },
-    { id: "t_sample_3", title: "30 Mins Deep Focus Session", done: true }
+    { id: "tsk_1", title: "Complete 1 Math Module", done: true },
+    { id: "tsk_2", title: "Write Review Notes", done: true },
+    { id: "tsk_3", title: "Deep Focus Session (45m)", done: true },
+    { id: "tsk_4", title: "Push code to GitHub", done: false }
   ],
   streak: {
     current: 2,
@@ -62,8 +96,6 @@ let appState = {
 };
 
 let tempTopics = [];
-let activeViewingCourseId = null;
-
 let currentSession = {
   courseId: null,
   topicId: null,
@@ -75,35 +107,111 @@ let currentSession = {
   isPaused: false
 };
 
-// Distinct theme accent palettes for course cards
-const cardThemes = [
-  { border: "border-emerald-500/30", hover: "hover:border-emerald-400", badgeBg: "bg-emerald-500", text: "text-emerald-400", bar: "bg-emerald-400", btn: "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" },
-  { border: "border-sky-500/40", hover: "hover:border-sky-400", badgeBg: "bg-sky-500", text: "text-sky-400", bar: "bg-sky-400", btn: "bg-sky-600 hover:bg-sky-500 text-white shadow" },
-  { border: "border-indigo-500/30", hover: "hover:border-indigo-400", badgeBg: "bg-indigo-600", text: "text-indigo-300", bar: "bg-indigo-500", btn: "bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30" },
-  { border: "border-amber-500/30", hover: "hover:border-amber-400", badgeBg: "bg-amber-500", text: "text-amber-300", bar: "bg-amber-500", btn: "bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30" },
-  { border: "border-rose-500/30", hover: "hover:border-rose-400", badgeBg: "bg-rose-500", text: "text-rose-300", bar: "bg-rose-500", btn: "bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30" },
-  { border: "border-cyan-500/30", hover: "hover:border-cyan-400", badgeBg: "bg-cyan-500", text: "text-cyan-300", bar: "bg-cyan-500", btn: "bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30" }
+// Course styling themes mimicking the pastel app cards
+const courseThemes = [
+  {
+    lightBg: "bg-emerald-50/60",
+    darkBg: "dark:bg-[#091b15]",
+    border: "border-emerald-200/80 dark:border-emerald-900/60",
+    badge: "bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
+    bar: "bg-emerald-500",
+    btn: "bg-emerald-600 hover:bg-emerald-500 text-white",
+    emoji: "📝"
+  },
+  {
+    lightBg: "bg-pink-50/60",
+    darkBg: "dark:bg-[#200e16]",
+    border: "border-pink-200/80 dark:border-pink-900/60",
+    badge: "bg-pink-100 dark:bg-pink-950 text-pink-600 dark:text-pink-400",
+    bar: "bg-rose-500",
+    btn: "bg-rose-500 hover:bg-rose-600 text-white",
+    emoji: "💻"
+  },
+  {
+    lightBg: "bg-sky-50/60",
+    darkBg: "dark:bg-[#0b1b2f]",
+    border: "border-sky-200/80 dark:border-sky-900/60",
+    badge: "bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400",
+    bar: "bg-sky-500",
+    btn: "bg-sky-500 hover:bg-sky-600 text-white",
+    emoji: "🧠"
+  },
+  {
+    lightBg: "bg-amber-50/60",
+    darkBg: "dark:bg-[#1a1711]",
+    border: "border-amber-200/80 dark:border-amber-900/60",
+    badge: "bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400",
+    bar: "bg-amber-500",
+    btn: "bg-amber-500 hover:bg-amber-600 text-white",
+    emoji: "🎯"
+  }
 ];
 
-// ================= 3. AUTH & VIEW SWITCHER =================
+// ================= 3. THEME MANAGER =================
+window.toggleTheme = function() {
+  const isDark = document.documentElement.classList.contains('dark');
+  applyTheme(isDark ? 'light' : 'dark');
+};
+
+function applyTheme(theme) {
+  const iconMobile = document.getElementById('themeIconMobile');
+  const iconDesktop = document.getElementById('themeIconDesktop');
+  
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+    if (iconMobile) iconMobile.className = 'fa-solid fa-sun text-amber-400';
+    if (iconDesktop) iconDesktop.className = 'fa-solid fa-sun text-amber-400';
+  } else {
+    document.documentElement.classList.add('light');
+    document.documentElement.classList.remove('dark');
+    if (iconMobile) iconMobile.className = 'fa-solid fa-moon text-slate-600';
+    if (iconDesktop) iconDesktop.className = 'fa-solid fa-moon text-slate-600';
+  }
+  localStorage.setItem('studyos_theme', theme);
+}
+
+// ================= 4. AUTH & VIEW SWITCHER =================
 function showView(screen) {
   const authView = document.getElementById("authGatewayView");
   const workspaceView = document.getElementById("mainWorkspaceView");
+  const bottomBar = document.getElementById("bottomTaskbar");
+  const desktopSidebar = document.getElementById("desktopSidebar");
 
   if (screen === "workspace") {
     authView.classList.add("hidden");
     workspaceView.classList.remove("hidden");
-    updateTimeGreeting();
+    
+    // Show Mobile bottom bar on phone view, desktop sidebar on large screen
+    if (bottomBar) {
+      bottomBar.classList.remove("hidden");
+      bottomBar.classList.add("flex");
+    }
+    if (desktopSidebar) {
+      desktopSidebar.classList.remove("hidden");
+      desktopSidebar.classList.add("lg:flex");
+    }
+
+    updateGreeting();
+    renderWeeklyCalendar();
     renderWorkspace();
   } else {
     workspaceView.classList.add("hidden");
+    if (bottomBar) {
+      bottomBar.classList.add("hidden");
+      bottomBar.classList.remove("flex");
+    }
+    if (desktopSidebar) {
+      desktopSidebar.classList.add("hidden");
+      desktopSidebar.classList.remove("lg:flex");
+    }
     authView.classList.remove("hidden");
   }
 }
 
 window.handleGoogleSignIn = async function() {
   if (!auth) {
-    alert("Firebase initialized nahi hai! Guest Mode chalu kar rahe hain.");
+    alert("Firebase config offline mode mein hai! Temporary Guest mode chalaya ja raha hai.");
     window.continueAsGuest();
     return;
   }
@@ -120,7 +228,7 @@ window.handleGoogleSignIn = async function() {
     if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") {
       console.warn("Login window was closed.");
     } else {
-      console.error("Sign in failed:", err);
+      console.error("Login failed:", err);
       alert("Login error: " + err.message);
     }
   } finally {
@@ -173,47 +281,88 @@ if (auth) {
   });
 }
 
-function updateTimeGreeting() {
+function updateGreeting() {
   const hour = new Date().getHours();
-  let greeting = "Good Day";
-  if (hour >= 4 && hour < 12) greeting = "Good Morning";
-  else if (hour >= 12 && hour < 17) greeting = "Good Afternoon";
-  else if (hour >= 17 && hour < 22) greeting = "Good Evening";
-  else greeting = "Good Night";
+  let greet = "Good Day";
+  if (hour >= 4 && hour < 12) greet = "Good Morning";
+  else if (hour >= 12 && hour < 17) greet = "Good Afternoon";
+  else if (hour >= 17 && hour < 22) greet = "Good Evening";
+  else greet = "Good Night";
 
-  const greetingElem = document.getElementById("timeGreetingText");
-  if (greetingElem) greetingElem.innerText = greeting;
+  const el = document.getElementById("heroGreetingText");
+  if (el) el.innerText = greet;
 }
 
 function updateUserInterface() {
   if (!currentUser) return;
   const firstName = currentUser.displayName ? currentUser.displayName.split(" ")[0] : "Scholar";
   
-  const heroNameElem = document.getElementById("heroUserName");
-  const navNameElem = document.getElementById("userDisplayName");
-  const emailElem = document.getElementById("userEmailText");
+  const heroName = document.getElementById("dashUserName");
+  const desktopName = document.getElementById("desktopUserName");
+  const desktopEmail = document.getElementById("desktopUserEmail");
+  const desktopAvatar = document.getElementById("desktopUserAvatar");
 
-  if (heroNameElem) heroNameElem.innerText = firstName;
-  if (navNameElem) navNameElem.innerText = currentUser.displayName || "Scholar";
-  if (emailElem) emailElem.innerText = currentUser.email || "Synced Mode";
+  if (heroName) heroName.innerText = firstName;
+  if (desktopName) desktopName.innerText = currentUser.displayName || "Scholar";
+  if (desktopEmail) desktopEmail.innerText = currentUser.email || "Offline Mode";
+
+  if (desktopAvatar) {
+    if (currentUser.photoURL) {
+      desktopAvatar.innerHTML = `<img src="${currentUser.photoURL}" class="w-full h-full object-cover rounded-full" />`;
+    } else {
+      desktopAvatar.innerText = firstName.charAt(0).toUpperCase();
+    }
+  }
 }
 
-// ================= 4. PERSISTENCE ENGINE =================
+// ================= 5. WEEKLY CALENDAR STRIP =================
+function renderWeeklyCalendar() {
+  const container = document.getElementById("weeklyCalendarRow");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const today = new Date();
+  const currentDayOfWeek = today.getDay(); // 0 (Sun) to 6 (Sat)
+  const monthName = today.toLocaleString('default', { month: 'short', year: 'numeric' });
+  
+  const monthElem = document.getElementById("calendarCurrentMonth");
+  if (monthElem) monthElem.innerText = monthName;
+
+  const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  // Compute Sunday of this current week
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - currentDayOfWeek);
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+    const dateNum = d.getDate();
+    const isToday = i === currentDayOfWeek;
+
+    const dayCard = document.createElement("div");
+    if (isToday) {
+      dayCard.className = "p-1.5 sm:p-2 rounded-xl bg-sky-500 text-white shadow-md shadow-sky-500/30 select-none";
+      dayCard.innerHTML = `
+        <span class="block text-[8px] sm:text-[9px] font-bold text-sky-100 uppercase">${daysShort[i]}</span>
+        <span class="block text-xs sm:text-sm font-mono font-black mt-0.5">${dateNum}</span>
+      `;
+    } else {
+      dayCard.className = "p-1.5 sm:p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 select-none";
+      dayCard.innerHTML = `
+        <span class="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase">${daysShort[i]}</span>
+        <span class="block text-xs sm:text-sm font-mono font-bold text-slate-600 dark:text-slate-300 mt-0.5">${dateNum}</span>
+      `;
+    }
+    container.appendChild(dayCard);
+  }
+}
+
+// ================= 6. PERSISTENCE ENGINE =================
 function loadLocalState() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     appState = JSON.parse(saved);
-  } else {
-    appState = {
-      courses: [],
-      history: [],
-      dailyTasks: [
-        { id: "t_1", title: "Complete Chapter 1", done: false },
-        { id: "t_2", title: "Review Architecture Diagram", done: false },
-        { id: "t_3", title: "1 Hour Deep Study Focus", done: false }
-      ],
-      streak: { current: 1, best: 1, lastActiveDate: new Date().toLocaleDateString() }
-    };
   }
 }
 
@@ -227,47 +376,36 @@ function persist() {
       dailyTasks: appState.dailyTasks || [],
       streak: appState.streak || { current: 1, best: 1 },
       lastUpdated: new Date().toISOString()
-    }, { merge: true }).catch(e => console.error("Cloud sync failed:", e));
+    }, { merge: true }).catch(e => console.error("Cloud push failed:", e));
   }
 }
 
-// ================= 5. WORKSPACE RENDERING =================
+// ================= 7. WORKSPACE RENDERING =================
 function renderWorkspace() {
   renderMetrics();
   renderCourses();
-  renderDailyTasks();
   renderHistory();
 }
 
 function renderMetrics() {
-  // 1. Overall Progress
-  let totalChapters = 0;
-  let completedChapters = 0;
+  // Overall Progress
+  let totalChs = 0;
+  let doneChs = 0;
   appState.courses.forEach(c => {
-    totalChapters += (c.topics ? c.topics.length : 0);
-    completedChapters += (c.topics ? c.topics.filter(t => t.done).length : 0);
+    totalChs += c.topics.length;
+    doneChs += c.topics.filter(t => t.done).length;
   });
-
-  const overallPct = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : 0;
+  const pct = totalChs > 0 ? Math.round((doneChs / totalChs) * 100) : 0;
   
   const pctElem = document.getElementById("kpiProgressPct");
-  const circleElem = document.getElementById("kpiProgressCircle");
-  const fractionElem = document.getElementById("kpiChaptersFraction");
-  const barElem = document.getElementById("kpiProgressBar");
+  if (pctElem) pctElem.innerText = `${pct}%`;
 
-  if (pctElem) pctElem.innerText = `${overallPct}%`;
-  if (circleElem) circleElem.setAttribute("stroke-dasharray", `${overallPct}, 100`);
-  if (fractionElem) fractionElem.innerText = `${completedChapters} / ${totalChapters} Chapters`;
-  if (barElem) barElem.style.width = `${overallPct}%`;
+  // Streak
+  const streak = appState.streak || { current: 2, best: 5 };
+  const streakElem = document.getElementById("kpiStreakDays");
+  if (streakElem) streakElem.innerText = `${streak.current} d`;
 
-  // 2. Study Streak
-  const streak = appState.streak || { current: 1, best: 1 };
-  const streakDaysElem = document.getElementById("kpiStreakDays");
-  const bestStreakElem = document.getElementById("kpiBestStreak");
-  if (streakDaysElem) streakDaysElem.innerText = streak.current || 1;
-  if (bestStreakElem) bestStreakElem.innerText = `Best Streak: ${streak.best || streak.current || 1} Days`;
-
-  // 3. Today's Study Time
+  // Today's Study Time
   const todayStr = new Date().toLocaleDateString();
   const todaySessions = appState.history.filter(h => h.date === todayStr);
   let totalMinutes = 0;
@@ -277,69 +415,60 @@ function renderMetrics() {
   const minutes = totalMinutes % 60;
   const timeFormatted = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   
-  const todayTimeElem = document.getElementById("kpiTodayStudyTime");
-  if (todayTimeElem) todayTimeElem.innerText = timeFormatted;
+  const timeElem = document.getElementById("kpiTodayStudyTime");
+  if (timeElem) timeElem.innerText = timeFormatted;
 
-  // 4. Completed Tasks
+  // Completed Tasks
   const tasks = appState.dailyTasks || [];
-  const completedTasks = tasks.filter(t => t.done).length;
+  const completed = tasks.filter(t => t.done).length;
   const tasksElem = document.getElementById("kpiCompletedTasksCount");
-  if (tasksElem) tasksElem.innerText = `${completedTasks} / ${tasks.length}`;
+  if (tasksElem) tasksElem.innerText = `${completed} / ${tasks.length}`;
 }
 
 function renderCourses() {
   const container = document.getElementById("coursesContainer");
-  const countBadge = document.getElementById("coursesCount");
-  if (!container || !countBadge) return;
+  if (!container) return;
   container.innerHTML = "";
-
-  countBadge.innerText = `${appState.courses.length} Courses`;
 
   if (appState.courses.length === 0) {
     container.className = "col-span-full";
     container.innerHTML = `
-      <div class="text-center py-12 border border-dashed border-app-border rounded-2xl w-full">
-        <p class="text-xs text-app-textMuted">Screen khali hai. Upar "+ Add Course" ya "Self Study" daba kar start karo!</p>
+      <div class="text-center py-10 border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl w-full">
+        <p class="text-xs text-slate-400">Abhi koi course nahi hai. Upar "+ Add Course" se chapter shuru karein!</p>
       </div>
     `;
     return;
   }
 
-  container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+  container.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5";
 
-  appState.courses.forEach((course, index) => {
+  appState.courses.forEach((course, idx) => {
     const total = course.topics.length;
     const completed = course.topics.filter(t => t.done).length;
     const pct = total ? Math.round((completed / total) * 100) : 0;
-    const theme = cardThemes[index % cardThemes.length];
-
-    const isFullyDone = total > 0 && completed === total;
-    const buttonLabel = isFullyDone ? "View →" : (completed > 0 ? "Continue →" : "Start →");
+    const theme = courseThemes[idx % courseThemes.length];
 
     const card = document.createElement("div");
-    card.className = `bg-[#0a1122] border ${theme.border} ${theme.hover} rounded-2xl p-4 flex flex-col justify-between space-y-3.5 relative transition shadow-sm`;
+    card.className = `${theme.lightBg} ${theme.darkBg} border ${theme.border} rounded-3xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 shadow-sm transition hover:shadow-md`;
 
     card.innerHTML = `
       <div class="space-y-2.5">
         <div class="flex items-center justify-between">
-          <div class="w-7 h-7 rounded-lg ${theme.badgeBg} text-slate-950 font-bold font-mono text-xs flex items-center justify-center shadow">
-            ${index + 1}
-          </div>
-          <span class="text-xs font-mono font-bold ${theme.text}">${pct}%</span>
+          <span class="text-2xl select-none">${theme.emoji}</span>
+          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${theme.badge}">${pct}%</span>
         </div>
-        
         <div>
-          <h3 class="text-sm font-bold text-white tracking-wide truncate" title="${course.name}">${course.name}</h3>
-          <span class="text-[10px] font-mono text-slate-400 block mt-0.5">${completed} / ${total} chapters</span>
+          <h4 class="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white truncate">${course.name}</h4>
+          <p class="text-[10px] font-mono text-slate-500">${completed} / ${total} Chapters Finished</p>
         </div>
-
-        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+        <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
           <div class="h-full ${theme.bar} rounded-full transition-all duration-300" style="width: ${pct}%"></div>
         </div>
       </div>
 
-      <button onclick="openCourseDrawer('${course.id}')" class="w-full py-2 rounded-xl ${theme.btn} text-[11px] font-bold flex items-center justify-center gap-1.5 transition cursor-pointer">
-        <span>${buttonLabel}</span>
+      <button onclick="openCourseDrawer('${course.id}')" class="w-full py-2 sm:py-2.5 ${theme.btn} rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer">
+        <i class="fa-solid fa-play text-[9px]"></i>
+        <span>${completed > 0 ? 'Continue Learning' : 'Start Learning'}</span>
       </button>
     `;
 
@@ -347,114 +476,6 @@ function renderCourses() {
   });
 }
 
-// ================= 6. COURSE CHAPTERS MODAL / DRAWER =================
-window.openCourseDrawer = function(courseId) {
-  const course = appState.courses.find(c => c.id === courseId);
-  if (!course) return;
-
-  activeViewingCourseId = courseId;
-  const completed = course.topics.filter(t => t.done).length;
-  
-  document.getElementById("drawerCourseTitle").innerText = course.name;
-  document.getElementById("drawerCourseMeta").innerText = `${completed} of ${course.topics.length} Chapters Completed`;
-
-  const list = document.getElementById("drawerChaptersList");
-  list.innerHTML = "";
-
-  course.topics.forEach((t, idx) => {
-    const row = document.createElement("div");
-    row.className = `flex items-center justify-between p-3 rounded-xl bg-slate-950/70 border ${t.done ? 'border-app-border/40 opacity-60' : 'border-app-border'} text-xs`;
-    
-    row.innerHTML = `
-      <div class="flex items-center gap-2.5">
-        <span class="font-mono text-emerald-400 font-bold">${idx + 1}.</span>
-        <span class="${t.done ? 'line-through text-slate-500' : 'text-slate-200 font-medium'}">${t.name}</span>
-        <span class="text-[10px] text-slate-500 font-mono">(${t.time}m)</span>
-      </div>
-      <div>
-        ${t.done ? `
-          <span class="text-emerald-400 text-xs font-mono font-bold pr-1">Done ✓</span>
-        ` : `
-          <button onclick="window.closeCourseDrawer(); startCourseFocus('${course.id}', '${t.id}', '${t.name.replace(/'/g, "\\'")}', ${t.time})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition shadow-sm cursor-pointer">
-            Start Focus
-          </button>
-        `}
-      </div>
-    `;
-    list.appendChild(row);
-  });
-
-  document.getElementById("courseDrawerModal").classList.remove("hidden");
-};
-
-window.closeCourseDrawer = function() {
-  document.getElementById("courseDrawerModal").classList.add("hidden");
-  activeViewingCourseId = null;
-};
-
-// ================= 7. TODAY'S TASKS MANAGER =================
-function renderDailyTasks() {
-  const container = document.getElementById("dailyTasksList");
-  if (!container) return;
-  container.innerHTML = "";
-
-  const tasks = appState.dailyTasks || [];
-
-  if (tasks.length === 0) {
-    container.innerHTML = `<p class="text-xs text-app-textMuted py-2 text-center">Koi target nahi banaya. Upar "+ Add Task" se aaj ka goal set karo!</p>`;
-    return;
-  }
-
-  tasks.forEach((task, idx) => {
-    const row = document.createElement("div");
-    row.className = "flex items-center justify-between p-2.5 rounded-xl bg-slate-950/70 border border-app-border text-xs";
-    row.innerHTML = `
-      <div class="flex items-center gap-2.5">
-        <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTaskDone('${task.id}')" class="w-4 h-4 rounded bg-slate-900 border-app-border text-emerald-500 focus:ring-0 cursor-pointer" />
-        <span class="${task.done ? 'line-through text-slate-500' : 'text-slate-200 font-medium'}">${task.title}</span>
-      </div>
-      <button onclick="removeTask('${task.id}')" class="text-slate-600 hover:text-rose-400 text-xs cursor-pointer p-1">
-        <i class="fa-solid fa-trash"></i>
-      </button>
-    `;
-    container.appendChild(row);
-  });
-}
-
-window.promptAddTask = function() {
-  const title = prompt("Aaj ka naya task / goal likhein:");
-  if (!title || !title.trim()) return;
-
-  if (!appState.dailyTasks) appState.dailyTasks = [];
-  appState.dailyTasks.push({
-    id: "task_" + Date.now(),
-    title: title.trim(),
-    done: false
-  });
-
-  persist();
-  renderMetrics();
-  renderDailyTasks();
-};
-
-window.toggleTaskDone = function(taskId) {
-  const task = appState.dailyTasks.find(t => t.id === taskId);
-  if (task) {
-    task.done = !task.done;
-    persist();
-    renderMetrics();
-    renderDailyTasks();
-  }
-};
-
-window.removeTask = function(taskId) {
-  appState.dailyTasks = appState.dailyTasks.filter(t => t.id !== taskId);
-  persist();
-  renderMetrics();
-  renderDailyTasks();
-};
-
-// ================= 8. HISTORY RENDERING =================
 function renderHistory() {
   const container = document.getElementById("historyList");
   const totalDisplay = document.getElementById("totalStudyTimeToday");
@@ -469,27 +490,69 @@ function renderHistory() {
   totalDisplay.innerText = `${totalMins} Mins`;
 
   if (todayHistory.length === 0) {
-    container.innerHTML = `<p class="text-xs text-app-textMuted py-3 text-center">Aaj abhi tak koi session log nahi hua.</p>`;
+    container.innerHTML = `<p class="text-xs text-slate-400 py-2 text-center">Aaj abhi tak koi focus session log nahi hua.</p>`;
     return;
   }
 
   todayHistory.forEach(h => {
     const row = document.createElement("div");
-    row.className = "flex items-center justify-between p-2.5 rounded-xl bg-slate-950/80 border border-app-border text-xs";
+    row.className = "flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-100 dark:border-app-borderDark text-xs";
     row.innerHTML = `
       <div class="flex items-center gap-2">
-        <i class="fa-solid fa-circle-check text-emerald-400 text-[10px]"></i>
-        <span class="font-bold text-white">${h.title}</span>
-        <span class="text-[10px] font-mono text-app-textMuted">(${h.category})</span>
+        <i class="fa-solid fa-circle-check text-emerald-500 text-[11px]"></i>
+        <span class="font-bold text-slate-800 dark:text-white">${h.title}</span>
+        <span class="text-[10px] font-mono text-slate-400">(${h.category})</span>
       </div>
       <div class="flex items-center gap-3 font-mono text-slate-400">
-        <span class="text-emerald-400 font-bold">${h.duration} min</span>
+        <span class="text-emerald-500 font-bold">${h.duration} min</span>
         <span class="text-[10px] text-slate-500">${h.timeLogged}</span>
       </div>
     `;
     container.appendChild(row);
   });
 }
+
+// ================= 8. COURSE CHAPTERS DRAWER =================
+window.openCourseDrawer = function(courseId) {
+  const course = appState.courses.find(c => c.id === courseId);
+  if (!course) return;
+
+  const completed = course.topics.filter(t => t.done).length;
+  document.getElementById("drawerCourseTitle").innerText = course.name;
+  document.getElementById("drawerCourseMeta").innerText = `${completed} of ${course.topics.length} Chapters Completed`;
+
+  const list = document.getElementById("drawerChaptersList");
+  list.innerHTML = "";
+
+  course.topics.forEach((t, idx) => {
+    const row = document.createElement("div");
+    row.className = `flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border ${t.done ? 'border-slate-200/50 dark:border-slate-800/50 opacity-60' : 'border-slate-200 dark:border-slate-800'} text-xs`;
+    
+    row.innerHTML = `
+      <div class="flex items-center gap-2.5">
+        <span class="font-mono text-sky-500 font-bold">${idx + 1}.</span>
+        <span class="${t.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200 font-medium'}">${t.name}</span>
+        <span class="text-[10px] text-slate-400 font-mono">(${t.time}m)</span>
+      </div>
+      <div>
+        ${t.done ? `
+          <span class="text-emerald-500 text-xs font-mono font-bold pr-1">Done ✓</span>
+        ` : `
+          <button onclick="window.closeCourseDrawer(); startCourseFocus('${course.id}', '${t.id}', '${t.name.replace(/'/g, "\\'")}', ${t.time})" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-bold shadow-sm transition cursor-pointer">
+            Start
+          </button>
+        `}
+      </div>
+    `;
+    list.appendChild(row);
+  });
+
+  document.getElementById("courseDrawerModal").classList.remove("hidden");
+};
+
+window.closeCourseDrawer = function() {
+  document.getElementById("courseDrawerModal").classList.add("hidden");
+};
 
 // ================= 9. FOCUS TIMER ENGINE =================
 window.startCourseFocus = function(courseId, topicId, title, minutes) {
@@ -507,7 +570,7 @@ window.startCourseFocus = function(courseId, topicId, title, minutes) {
 };
 
 window.startSelfStudy = function() {
-  const subject = document.getElementById("selfStudySubject").value.trim() || "Independent Reading";
+  const subject = document.getElementById("selfStudySubject").value.trim() || "Independent Focus";
   const mins = parseInt(document.getElementById("selfStudyMinutes").value) || 30;
 
   currentSession = {
@@ -527,6 +590,7 @@ window.startSelfStudy = function() {
 
 function launchFullScreen() {
   document.getElementById("mainWorkspaceView").classList.add("hidden");
+  document.getElementById("bottomTaskbar").classList.add("hidden");
   document.getElementById("fullScreenFocus").classList.remove("hidden");
 
   document.getElementById("focusCategoryBadge").innerText = currentSession.category;
@@ -581,7 +645,7 @@ window.endFocusEarly = function() {
 };
 
 window.cancelFocusSession = function() {
-  if (confirm("Cancel focus session? This will not be saved.")) {
+  if (confirm("Cancel focus session? Data will not be saved.")) {
     clearInterval(currentSession.intervalId);
     exitFullScreen();
   }
@@ -590,6 +654,7 @@ window.cancelFocusSession = function() {
 function exitFullScreen() {
   document.getElementById("fullScreenFocus").classList.add("hidden");
   document.getElementById("mainWorkspaceView").classList.remove("hidden");
+  document.getElementById("bottomTaskbar").classList.remove("hidden");
   renderWorkspace();
 }
 
@@ -613,7 +678,7 @@ function logSessionComplete() {
   persist();
 }
 
-// ================= 10. COURSE MODAL ACTIONS =================
+// ================= 10. MODAL ACTIONS =================
 window.openAddCourseModal = function() {
   tempTopics = [];
   document.getElementById("modalCourseTitle").value = "";
@@ -644,14 +709,14 @@ function renderModalPreview() {
 
   tempTopics.forEach((t, idx) => {
     const item = document.createElement("div");
-    item.className = "flex items-center justify-between bg-slate-950 px-3 py-1.5 rounded-lg border border-app-border text-xs";
+    item.className = "flex items-center justify-between bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-xl text-xs";
     item.innerHTML = `
       <div class="flex items-center gap-2">
-        <span class="font-mono text-emerald-400 font-bold">${idx + 1}.</span>
-        <span class="text-white">${t.name}</span>
-        <span class="text-[10px] text-slate-500 font-mono">(${t.time}m)</span>
+        <span class="font-mono text-emerald-500 font-bold">${idx + 1}.</span>
+        <span class="text-slate-800 dark:text-white">${t.name}</span>
+        <span class="text-[10px] text-slate-400 font-mono">(${t.time}m)</span>
       </div>
-      <button onclick="tempTopics.splice(${idx}, 1); renderModalPreview();" class="text-slate-500 hover:text-rose-400 cursor-pointer">
+      <button onclick="tempTopics.splice(${idx}, 1); renderModalPreview();" class="text-slate-400 hover:text-rose-500 cursor-pointer">
         <i class="fa-solid fa-xmark"></i>
       </button>
     `;
@@ -661,8 +726,8 @@ function renderModalPreview() {
 
 window.saveNewCourse = function() {
   const title = document.getElementById("modalCourseTitle").value.trim();
-  if (!title) return alert("Course name zaroori hai!");
-  if (tempTopics.length === 0) return alert("Kam se kam 1 chapter add karo!");
+  if (!title) return alert("Course title required!");
+  if (tempTopics.length === 0) return alert("Kam se kam 1 chapter add karein!");
 
   appState.courses.push({
     id: "c_" + Date.now(),
@@ -689,5 +754,7 @@ window.closeSelfStudyModal = function() {
   document.getElementById("selfStudyModal").classList.add("hidden");
 };
 
-// Initial state
+// Apply saved theme & initial gateway view
+const savedTheme = localStorage.getItem('studyos_theme') || 'light';
+applyTheme(savedTheme);
 showView("auth");

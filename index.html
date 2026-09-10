@@ -1,13 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>StudyOS — AI Engineer Workspace</title>
-  
+
   <!-- High-Contrast Hexagon Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23080d1a'/%3E%3Cpolygon points='16,4 26,10 26,22 16,28 6,22 6,10' stroke='%2338bdf8' stroke-width='2.5' fill='none' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%2310b981'/%3E%3C/svg%3E">
-  
+
+  <!-- External Custom CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Tailwind CSS with Dark Mode Class Strategy -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +20,7 @@
 
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
@@ -24,11 +29,12 @@
           },
           colors: {
             app: {
-              bg: '#070b14',
-              card: '#0d1527',
-              border: '#1b273f',
-              textMuted: '#64748b',
-              textLight: '#94a3b8'
+              lightBg: '#f8fafc',
+              darkBg: '#080d1a',
+              cardLight: '#ffffff',
+              cardDark: '#0f172a',
+              borderLight: '#e2e8f0',
+              borderDark: '#1e293b'
             }
           }
         }
@@ -36,377 +42,462 @@
     }
   </script>
 </head>
-<body class="bg-app-bg text-slate-100 min-h-screen font-sans antialiased selection:bg-emerald-500 selection:text-white flex flex-col justify-between">
+<body class="bg-slate-50 dark:bg-[#070b14] text-slate-800 dark:text-slate-100 min-h-screen font-sans antialiased selection:bg-sky-500 selection:text-white flex flex-col lg:flex-row">
 
-  <!-- ================= 1. GATEWAY SCREEN (LOGIN FIRST VIEW) ================= -->
-  <section id="authGatewayView" class="min-h-screen flex flex-col items-center justify-center p-4">
-    <div class="max-w-md w-full bg-app-card border border-app-border rounded-3xl p-8 shadow-2xl text-center space-y-6 relative overflow-hidden my-auto">
+  <!-- Background Decorative Ambient Glows -->
+  <div class="fixed top-0 left-0 lg:left-64 w-80 h-80 bg-sky-200/40 dark:bg-sky-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+  <div class="fixed bottom-0 right-0 w-96 h-96 bg-amber-200/30 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+
+  <!-- ================= VIEW 1: AUTH GATEWAY (LOGIN FIRST) ================= -->
+  <section id="authGatewayView" class="w-full min-h-screen flex flex-col items-center justify-between p-5 relative z-10">
+    
+    <!-- Top Notch for Phone -->
+    <div class="w-full max-w-sm flex items-center justify-between pt-1 px-2 text-xs font-semibold text-slate-500 lg:hidden">
+      <span>9:30</span>
+      <div class="flex items-center gap-1.5 text-[11px]">
+        <i class="fa-solid fa-signal"></i>
+        <i class="fa-solid fa-wifi"></i>
+        <i class="fa-solid fa-battery-full text-xs"></i>
+      </div>
+    </div>
+
+    <!-- Main Center Login Card -->
+    <div class="w-full max-w-sm my-auto py-6 space-y-6">
       
-      <div class="w-32 h-32 bg-sky-500/10 rounded-full blur-3xl absolute -top-10 -left-10 pointer-events-none"></div>
-      <div class="w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl absolute -bottom-10 -right-10 pointer-events-none"></div>
-      
-      <!-- Brand Badge -->
-      <div class="mx-auto relative flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-sky-500 to-emerald-400 p-[1.5px] shadow-xl shadow-sky-500/20">
-        <div class="w-full h-full bg-[#0a0f1d] rounded-[14px] flex items-center justify-center backdrop-blur-md">
-          <svg class="w-8 h-8 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Character / Badge Artwork -->
+      <div class="text-center space-y-3">
+        <div class="relative w-36 h-36 mx-auto flex items-center justify-center">
+          <div class="w-32 h-32 rounded-full bg-gradient-to-b from-sky-100 to-indigo-50 dark:from-slate-800 dark:to-slate-900 border border-sky-200/60 dark:border-slate-700 flex items-center justify-center shadow-inner">
+            <span class="text-5xl select-none">👨‍💻</span>
+          </div>
+          <div class="absolute -right-1 top-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-xl shadow-md text-[9px] font-bold text-sky-600 dark:text-sky-400 rotate-6">
+            Better Learning ✨
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Welcome Back, <span class="text-sky-500">Scholar!</span></h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-[260px] mx-auto font-medium">
+            Your dreams are just a few focused chapters away.
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Card -->
+      <div class="bg-white/90 dark:bg-app-cardDark/90 backdrop-blur-xl border border-slate-200/80 dark:border-app-borderDark rounded-3xl p-6 shadow-xl space-y-3.5">
+        
+        <!-- Google Sign-in -->
+        <button onclick="handleGoogleSignIn()" class="w-full py-3.5 px-4 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-3 shadow-sm transition active:scale-[0.98] cursor-pointer">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+
+        <!-- Guest Sign-in -->
+        <button onclick="continueAsGuest()" class="w-full py-3 px-4 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer">
+          <i class="fa-regular fa-user text-xs"></i>
+          <span>Continue as Guest (Local Only)</span>
+        </button>
+
+        <div class="pt-2 text-center text-[10px] text-slate-400 font-mono flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-cloud text-sky-400"></i>
+          <span>Cross-device real-time sync enabled</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clean Spaced Footer -->
+    <div class="w-full text-center text-xs font-mono text-slate-400 py-3 select-none">
+      Made with <span class="text-amber-500">⚡</span> by <span class="font-bold text-slate-700 dark:text-slate-200">Utsav Kushwaha</span>
+    </div>
+  </section>
+
+
+  <!-- ================= VIEW 2: DESKTOP LEFT SIDEBAR (LARGE SCREENS) ================= -->
+  <aside id="desktopSidebar" class="hidden w-64 border-r border-slate-200 dark:border-app-borderDark bg-white/80 dark:bg-[#0d1527]/80 backdrop-blur-xl p-5 flex-col justify-between h-screen sticky top-0 z-30 flex-shrink-0">
+    <div class="space-y-6">
+      <div class="flex items-center gap-3 px-1">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <polygon points="12 2 2 7 12 12 22 7 12 2" />
             <polyline points="2 17 12 22 22 17" />
             <polyline points="2 12 12 17 22 12" />
           </svg>
         </div>
-        <span class="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-sky-500 ring-2 ring-[#0a0f1d]"></span>
-        </span>
-      </div>
-
-      <div>
-        <div class="inline-flex items-center gap-2">
-          <h1 class="text-3xl font-black tracking-tight text-white">Study<span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-emerald-400">OS</span></h1>
-          <span class="text-[10px] font-mono tracking-widest text-sky-400 border border-sky-500/30 px-1.5 py-0.5 rounded bg-sky-500/10 uppercase">v1.0</span>
+        <div>
+          <h1 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Study<span class="text-sky-500">OS</span></h1>
+          <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Learn • Track • Grow</p>
         </div>
-        <p class="text-xs text-app-textMuted mt-2 leading-relaxed">
-          Your cloud-synced, distraction-free personal study operating system.
-        </p>
       </div>
 
-      <div class="space-y-3 pt-2">
-        <button onclick="handleGoogleSignIn()" class="w-full py-3.5 px-4 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl flex items-center justify-center gap-2.5 shadow-lg transition duration-200 cursor-pointer">
-          <i class="fa-brands fa-google text-rose-500 text-sm"></i>
-          <span>Continue with Google</span>
+      <nav class="space-y-1.5 text-xs font-semibold">
+        <button class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-800/80">
+          <i class="fa-solid fa-house text-sm"></i>
+          <span>Home Dashboard</span>
         </button>
-
-        <button onclick="continueAsGuest()" class="w-full py-2.5 px-4 bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white font-semibold text-xs rounded-xl border border-app-border transition cursor-pointer">
-          Continue as Guest (Local Only)
+        <button onclick="openAddCourseModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">
+          <i class="fa-solid fa-book text-sm"></i>
+          <span>Add New Course</span>
         </button>
-      </div>
-
-      <div class="pt-4 border-t border-app-border/60 text-[11px] text-app-textMuted flex items-center justify-center gap-1.5 font-mono">
-        <i class="fa-solid fa-cloud text-[10px] text-sky-400"></i>
-        <span>Cross-device real-time sync enabled</span>
-      </div>
-
+        <button onclick="openSelfStudyModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">
+          <i class="fa-solid fa-stopwatch text-sm text-amber-500"></i>
+          <span>Self Study Focus</span>
+        </button>
+      </nav>
     </div>
 
-    <div class="py-6 text-center text-xs font-mono text-slate-500 select-none">
-      Made by <span class="font-bold text-slate-300 tracking-wide hover:text-sky-400 transition-colors">Utsav Kushwaha</span>
-    </div>
-  </section>
-
-
-  <!-- ================= 2. WORKSPACE DESK ================= -->
-  <div id="mainWorkspaceView" class="hidden max-w-6xl w-full mx-auto px-4 py-6 space-y-6 flex-1">
-
-    <!-- Top Navbar with original Controls intact -->
-    <header class="flex items-center justify-between pb-5 border-b border-app-border">
-      <div class="flex items-center gap-3 select-none">
-        <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-sky-500 to-emerald-400 p-[1.5px] shadow-lg shadow-sky-500/20">
-          <div class="w-full h-full bg-[#0a0f1d] rounded-[10px] flex items-center justify-center backdrop-blur-md">
-            <svg class="w-5 h-5 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 2 7 12 12 22 7 12 2" />
-              <polyline points="2 17 12 22 22 17" />
-              <polyline points="2 12 12 17 22 12" />
-            </svg>
+    <!-- User Profile Details & Logout in Sidebar -->
+    <div class="border-t border-slate-200 dark:border-app-borderDark pt-4 space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div id="desktopUserAvatar" class="w-9 h-9 rounded-full bg-sky-100 dark:bg-sky-900/50 border border-sky-200 dark:border-sky-700 flex items-center justify-center text-sky-600 dark:text-sky-300 font-bold text-xs flex-shrink-0">
+            ⚡
           </div>
-          <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 ring-2 ring-[#0a0f1d]"></span>
-          </span>
+          <div class="truncate leading-tight">
+            <span id="desktopUserName" class="text-xs font-extrabold text-slate-900 dark:text-white truncate block">Scholar</span>
+            <span id="desktopUserEmail" class="text-[10px] text-emerald-500 font-mono">● Online Mode</span>
+          </div>
         </div>
+        <button onclick="handleSignOut()" class="text-slate-400 hover:text-rose-500 transition p-1.5 cursor-pointer" title="Logout">
+          <i class="fa-solid fa-right-from-bracket text-xs"></i>
+        </button>
+      </div>
 
-        <div class="flex flex-col text-left">
-          <div class="flex items-center gap-1.5">
-            <span class="text-sm font-bold tracking-tight text-white">Study<span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400">OS</span></span>
-            <span id="userDisplayName" class="text-xs text-slate-300 font-semibold border-l border-app-border pl-1.5">Scholar</span>
-          </div>
-          <p id="userEmailText" class="text-[10px] text-app-textMuted font-mono">Synced Mode</p>
+      <div class="text-center text-[10px] font-mono text-slate-400 pt-1">
+        Made by <span class="font-bold text-slate-600 dark:text-slate-300">Utsav Kushwaha</span>
+      </div>
+    </div>
+  </aside>
+
+
+  <!-- ================= VIEW 3: MAIN WORKSPACE DESK (RESPONSIVE) ================= -->
+  <main id="mainWorkspaceView" class="hidden flex-1 max-w-md lg:max-w-6xl mx-auto px-4 lg:px-8 pt-3 pb-28 lg:pb-12 space-y-5 relative z-10">
+
+    <!-- Mobile Top App Bar (< lg only) -->
+    <header class="flex items-center justify-between pb-1 lg:hidden">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-sky-500/25">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+            <polyline points="2 17 12 22 22 17" />
+            <polyline points="2 12 12 17 22 12" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-extrabold text-slate-900 dark:text-white leading-tight">Study<span class="text-sky-500">OS</span></h1>
+          <p class="text-[9px] font-semibold text-slate-400 tracking-wider uppercase">Learn • Track • Grow</p>
         </div>
       </div>
 
-      <!-- Retained Action Buttons -->
       <div class="flex items-center gap-2">
-        <button onclick="openSelfStudyModal()" class="bg-app-card hover:bg-slate-800 text-slate-200 border border-app-border text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 transition cursor-pointer">
-          <i class="fa-solid fa-stopwatch text-amber-400"></i>
-          <span>Self Study</span>
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Online</span>
+        </span>
+        <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-amber-400 flex items-center justify-center text-xs shadow-sm cursor-pointer" title="Toggle Theme">
+          <i id="themeIconMobile" class="fa-solid fa-moon"></i>
         </button>
-
-        <button onclick="openAddCourseModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-lg shadow-emerald-600/25 transition cursor-pointer">
-          <i class="fa-solid fa-plus text-xs"></i>
-          <span>Add Course</span>
-        </button>
-
-        <button onclick="handleSignOut()" class="w-8 h-8 rounded-xl bg-app-card border border-app-border text-slate-400 hover:text-rose-400 flex items-center justify-center text-xs transition cursor-pointer" title="Logout">
+        <button onclick="handleSignOut()" class="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-500 flex items-center justify-center text-xs cursor-pointer" title="Logout">
           <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>
     </header>
 
-    <!-- 1. Dynamic Greeting Hero Banner -->
-    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0c1938] via-[#0f244d] to-[#122e62] border border-app-border p-6 md:p-8 flex items-center justify-between shadow-2xl">
-      <div class="absolute -top-16 -left-16 w-52 h-52 bg-sky-500/20 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div class="relative z-10 space-y-1.5">
-        <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-          <span id="timeGreetingText">Good Day</span>, <span id="heroUserName" class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-200 to-emerald-400">Scholar</span>!
-        </h1>
-        <p class="text-xs md:text-sm text-slate-300 font-medium tracking-wide">
-          Keep going! Your future AI Engineer self will thank you.
-        </p>
+    <!-- Desktop Top Utility Bar (lg+ only) -->
+    <header class="hidden lg:flex items-center justify-between pb-3 border-b border-slate-200 dark:border-app-borderDark">
+      <div>
+        <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">AI Engineer Workspace</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Track your curriculum, focus sessions, and chapter progress</p>
       </div>
 
-      <!-- Vector Mountain & Sun Artwork -->
-      <div class="relative w-44 h-24 hidden sm:block select-none pointer-events-none">
-        <div class="absolute top-1 right-12 w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-lg shadow-amber-400/40"></div>
-        <svg class="absolute bottom-0 right-0 w-40 h-20 text-sky-900/50 fill-current" viewBox="0 0 100 50">
-          <polygon points="10,50 45,12 80,50" />
-        </svg>
-        <svg class="absolute bottom-0 right-4 w-32 h-16 text-sky-600/70 fill-current" viewBox="0 0 100 50">
-          <polygon points="0,50 35,8 70,50" />
-          <polygon points="50,50 78,20 100,50" />
-        </svg>
-      </div>
-    </section>
-
-    <!-- 2. Four KPI Metrics Cards -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      
-      <!-- Card 1: Overall Progress -->
-      <div class="bg-app-card border border-app-border rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group hover:border-emerald-500/40 transition">
-        <div class="relative w-14 h-14 flex items-center justify-center flex-shrink-0">
-          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-            <path class="text-slate-800" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <path id="kpiProgressCircle" class="text-emerald-400" stroke-dasharray="0, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-          </svg>
-          <span id="kpiProgressPct" class="absolute text-xs font-mono font-bold text-white">0%</span>
-        </div>
-        <div class="space-y-1">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Overall Progress</span>
-          <span id="kpiChaptersFraction" class="text-sm font-bold text-white font-mono">0 / 0 Chapters</span>
-          <div class="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1">
-            <div id="kpiProgressBar" class="h-full bg-emerald-400 rounded-full transition-all duration-300" style="width: 0%"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 2: Study Streak -->
-      <div class="bg-app-card border border-app-border rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group hover:border-rose-500/40 transition">
-        <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 text-xl shadow-inner flex-shrink-0">
-          <i class="fa-solid fa-fire"></i>
-        </div>
-        <div>
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Study Streak</span>
-          <div class="flex items-baseline gap-2">
-            <span id="kpiStreakDays" class="text-xl font-extrabold text-white font-mono">1</span>
-            <span class="text-xs font-bold text-slate-400">Days</span>
-          </div>
-          <span id="kpiBestStreak" class="text-[10px] text-slate-500 font-mono">Best Streak: 1 Days</span>
-        </div>
-      </div>
-
-      <!-- Card 3: Today's Study Time -->
-      <div class="bg-app-card border border-app-border rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group hover:border-sky-500/40 transition">
-        <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 text-xl shadow-inner flex-shrink-0">
-          <i class="fa-solid fa-clock"></i>
-        </div>
-        <div>
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Today's Study Time</span>
-          <span id="kpiTodayStudyTime" class="text-lg font-extrabold text-white font-mono">0m</span>
-          <span class="text-[10px] text-slate-500 font-mono block">Target: 2h</span>
-        </div>
-      </div>
-
-      <!-- Card 4: Completed Tasks -->
-      <div class="bg-app-card border border-app-border rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group hover:border-amber-500/40 transition">
-        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-xl shadow-inner flex-shrink-0">
-          <i class="fa-solid fa-circle-check"></i>
-        </div>
-        <div>
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Completed Tasks</span>
-          <span id="kpiCompletedTasksCount" class="text-xl font-extrabold text-white font-mono">0 / 0</span>
-          <span class="text-[10px] text-slate-500 font-mono block">Today's Goal</span>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- 3. Active Courses (Horizontal Learning Roadmap Layout) -->
-    <section class="bg-app-card border border-app-border rounded-3xl p-6 space-y-6 shadow-xl">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-app-border">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-base">
-            <i class="fa-solid fa-book-open"></i>
-          </div>
-          <div>
-            <h2 class="text-sm font-extrabold text-white uppercase tracking-wider">Active Courses</h2>
-            <p class="text-[11px] text-slate-400">Click View to open chapters and start your focus session.</p>
-          </div>
-        </div>
-        <span id="coursesCount" class="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full self-start sm:self-auto">0 Courses</span>
-      </div>
-
-      <!-- Roadmap Grid -->
-      <div id="coursesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <!-- Injected via JS -->
-      </div>
-    </section>
-
-    <!-- 4. Today's Tasks Interactive Section -->
-    <section class="bg-app-card border border-app-border rounded-2xl p-5 shadow-sm space-y-3">
-      <div class="flex items-center justify-between border-b border-app-border pb-3">
-        <div>
-          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Today's Targets & Goals</h3>
-          <p class="text-[11px] text-app-textMuted">Mark tasks completed to advance your daily goal</p>
-        </div>
-        <button onclick="promptAddTask()" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-sky-400 border border-app-border rounded-lg text-xs font-mono transition cursor-pointer">
-          + Add Task
+      <div class="flex items-center gap-3">
+        <button onclick="toggleTheme()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark text-xs font-semibold flex items-center gap-2 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition cursor-pointer">
+          <i id="themeIconDesktop" class="fa-solid fa-moon text-slate-600 dark:text-amber-400"></i>
+          <span class="text-[11px] text-slate-600 dark:text-slate-300">Theme</span>
+        </button>
+        <button onclick="openSelfStudyModal()" class="px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer">
+          <i class="fa-solid fa-stopwatch text-xs"></i>
+          <span>Self Study</span>
+        </button>
+        <button onclick="openAddCourseModal()" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-emerald-600/20 transition cursor-pointer">
+          <i class="fa-solid fa-plus text-xs"></i>
+          <span>New Course</span>
         </button>
       </div>
-      <div id="dailyTasksList" class="space-y-2 pt-1">
-        <!-- Injected via JS -->
+    </header>
+
+    <!-- Hero Greeting & Today's Focus (Grid $2:1$ on Desktop, Stack on Mobile) -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Greeting Banner -->
+      <div class="lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-100 dark:from-[#0d1e38] dark:via-[#0c2642] dark:to-[#0f304d] border border-teal-100 dark:border-slate-700 p-4.5 p-4 sm:p-6 flex items-center justify-between shadow-sm">
+        <div class="space-y-1 relative z-10">
+          <h2 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <span id="heroGreetingText">Good Evening</span>, <span id="dashUserName" class="text-teal-600 dark:text-sky-400">Scholar</span> 👋
+          </h2>
+          <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 max-w-md font-medium leading-relaxed">
+            Keep going! Your future AI Engineer self will thank you. Every focused session counts.
+          </p>
+        </div>
+
+        <div class="relative w-20 sm:w-28 h-16 sm:h-24 flex items-center justify-center flex-shrink-0 select-none">
+          <span class="text-5xl sm:text-6xl">👨‍💻</span>
+          <div class="absolute -top-1 -right-1 bg-white/90 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded-lg shadow-sm text-[8px] sm:text-[9px] font-bold text-teal-600 dark:text-teal-400">
+            Better Daily ✨
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Focus Action Pill -->
+      <div onclick="openSelfStudyModal()" class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-3xl p-4 sm:p-5 flex items-center justify-between lg:flex-col lg:justify-between shadow-sm cursor-pointer hover:border-pink-300 dark:hover:border-pink-500 transition group">
+        <div class="flex items-center gap-3 lg:w-full">
+          <div class="w-11 h-11 rounded-2xl bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-900/60 flex items-center justify-center text-pink-500 text-lg shadow-sm flex-shrink-0">
+            <i class="fa-solid fa-bullseye"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Today's Focus</span>
+            <h4 id="activeFocusTitle" class="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-white group-hover:text-pink-500 transition">Self Study Focus</h4>
+          </div>
+        </div>
+        <div class="w-7 h-7 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-xs lg:hidden">
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </div>
+        <div class="hidden lg:flex w-full pt-2 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-xs font-bold text-pink-500">
+          <span>Start Focus Timer</span>
+          <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
+        </div>
       </div>
     </section>
 
-    <!-- 5. Today's Study History -->
-    <section class="bg-app-card border border-app-border rounded-2xl p-5 shadow-sm space-y-3">
-      <div class="flex items-center justify-between border-b border-app-border pb-3">
-        <div>
-          <h3 class="text-xs font-bold text-white uppercase tracking-wider">Today's Study History</h3>
-          <p class="text-[11px] text-app-textMuted">Completed focus sessions for today</p>
+    <!-- Four Side-by-Side KPI Metrics (Compact 4-Column on Mobile & Desktop) -->
+    <section class="grid grid-cols-4 gap-2 sm:gap-3.5">
+      <!-- 1. Streak -->
+      <div class="bg-amber-50/70 dark:bg-[#1a1711] border border-amber-200/70 dark:border-amber-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
+        <div class="flex items-center gap-1 text-amber-500">
+          <i class="fa-solid fa-fire text-xs"></i>
+          <span id="kpiStreakDays" class="text-xs sm:text-sm font-black font-mono">1 d</span>
         </div>
-        <div class="text-right">
-          <span id="totalStudyTimeToday" class="text-sm font-mono font-bold text-emerald-400">0 Mins</span>
-          <span class="block text-[10px] text-app-textMuted font-mono uppercase">Total Logged</span>
-        </div>
+        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Study Streak</span>
       </div>
 
+      <!-- 2. Focus Time -->
+      <div class="bg-sky-50/70 dark:bg-[#0c1b2c] border border-sky-200/70 dark:border-sky-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
+        <div class="flex items-center gap-1 text-sky-500">
+          <i class="fa-regular fa-clock text-xs"></i>
+          <span id="kpiTodayStudyTime" class="text-xs sm:text-sm font-black font-mono">0m</span>
+        </div>
+        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Today Time</span>
+      </div>
+
+      <!-- 3. Progress -->
+      <div class="bg-emerald-50/70 dark:bg-[#0d2218] border border-emerald-200/70 dark:border-emerald-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
+        <div class="flex items-center gap-1 text-emerald-500">
+          <i class="fa-solid fa-chart-pie text-xs"></i>
+          <span id="kpiProgressPct" class="text-xs sm:text-sm font-black font-mono">0%</span>
+        </div>
+        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Progress</span>
+      </div>
+
+      <!-- 4. Tasks -->
+      <div class="bg-indigo-50/70 dark:bg-[#15142a] border border-indigo-200/70 dark:border-indigo-900/40 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between space-y-1 shadow-sm">
+        <div class="flex items-center gap-1 text-indigo-500">
+          <i class="fa-regular fa-circle-check text-xs"></i>
+          <span id="kpiCompletedTasksCount" class="text-xs sm:text-sm font-black font-mono">0 / 0</span>
+        </div>
+        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">Tasks Done</span>
+      </div>
+    </section>
+
+    <!-- Weekly Calendar Consistency Strip -->
+    <section class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-2xl p-3.5 space-y-2.5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-sky-50 dark:bg-sky-950 flex items-center justify-center text-sky-500 text-xs">
+            <i class="fa-regular fa-calendar"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-800 dark:text-white leading-none">Weekly Calendar</h4>
+            <span class="text-[9px] text-slate-400">Keep up your daily consistency!</span>
+          </div>
+        </div>
+        <span id="calendarCurrentMonth" class="text-[10px] font-mono font-bold text-sky-500">This Week</span>
+      </div>
+
+      <div id="weeklyCalendarRow" class="grid grid-cols-7 gap-1.5 sm:gap-2.5 text-center select-none pt-1">
+        <!-- Dynamically Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- Active Courses Grid -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <h3 class="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">Your Courses</h3>
+          <p class="text-[10px] text-slate-400">Click to expand chapters and start focus session</p>
+        </div>
+        <button onclick="openAddCourseModal()" class="text-xs font-bold text-sky-500 hover:text-sky-600 flex items-center gap-1 cursor-pointer">
+          <span>+ Add Course</span>
+        </button>
+      </div>
+
+      <!-- Mobile: 1-col | Desktop: 3-col Grid -->
+      <div id="coursesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        <!-- Dynamically injected via JS -->
+      </div>
+    </section>
+
+    <!-- History / Sessions Feed -->
+    <section class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-2xl p-4 shadow-sm space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div>
+          <h4 class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Today's Study History</h4>
+          <p class="text-[10px] text-slate-400">Completed sessions logged today</p>
+        </div>
+        <span id="totalStudyTimeToday" class="text-xs font-mono font-bold text-emerald-500">0 Mins</span>
+      </div>
       <div id="historyList" class="space-y-2 pt-1">
         <!-- Injected via JS -->
       </div>
     </section>
 
-    <!-- Footer Signature -->
-    <footer class="pt-6 pb-4 text-center border-t border-app-border/40 select-none">
-      <p class="text-xs font-mono text-slate-500">
-        StudyOS • Made by <span class="font-bold text-slate-300 hover:text-emerald-400 transition-colors">Utsav Kushwaha</span>
-      </p>
-    </footer>
-
-  </div>
+  </main>
 
 
-  <!-- ================= 3. COURSE CHAPTERS MODAL / DRAWER ================= -->
-  <div id="courseDrawerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-app-card border border-app-border rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
-      <div class="flex justify-between items-center pb-3 border-b border-app-border">
+  <!-- ================= FIXED BOTTOM NATIVE TASKBAR (MOBILE ONLY) ================= -->
+  <nav id="bottomTaskbar" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 max-w-md mx-auto py-2 px-6 items-center justify-between shadow-2xl lg:hidden">
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center gap-1 text-sky-500 font-bold cursor-pointer">
+      <div class="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-950 flex items-center justify-center text-sm">
+        <i class="fa-solid fa-house"></i>
+      </div>
+      <span class="text-[10px]">Home</span>
+    </button>
+
+    <button onclick="openAddCourseModal()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+      <div class="w-8 h-8 flex items-center justify-center text-sm">
+        <i class="fa-solid fa-book"></i>
+      </div>
+      <span class="text-[10px]">Courses</span>
+    </button>
+
+    <button onclick="openSelfStudyModal()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-500 -mt-3 cursor-pointer">
+      <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-400 to-amber-500 text-white flex items-center justify-center text-base shadow-lg shadow-amber-500/30">
+        <i class="fa-solid fa-bullseye"></i>
+      </div>
+      <span class="text-[9px] font-bold">Focus</span>
+    </button>
+
+    <button onclick="document.getElementById('historyList').scrollIntoView({behavior: 'smooth'})" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+      <div class="w-8 h-8 flex items-center justify-center text-sm">
+        <i class="fa-solid fa-chart-simple"></i>
+      </div>
+      <span class="text-[10px]">History</span>
+    </button>
+
+    <button onclick="handleSignOut()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-rose-500 cursor-pointer">
+      <div class="w-8 h-8 flex items-center justify-center text-sm">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </div>
+      <span class="text-[10px]">Logout</span>
+    </button>
+  </nav>
+
+
+  <!-- ================= MODALS & DRAWERS ================= -->
+
+  <!-- Drawer: Course Chapters -->
+  <div id="courseDrawerModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white dark:bg-app-cardDark border-t sm:border border-slate-200 dark:border-app-borderDark rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
         <div>
-          <h3 id="drawerCourseTitle" class="text-base font-bold text-white tracking-wide">Course Chapters</h3>
-          <p id="drawerCourseMeta" class="text-xs font-mono text-app-textMuted">0 of 0 Completed</p>
+          <h3 id="drawerCourseTitle" class="text-base font-extrabold text-slate-900 dark:text-white">Course Chapters</h3>
+          <span id="drawerCourseMeta" class="text-xs font-mono text-slate-400">0 of 0 Completed</span>
         </div>
-        <button onclick="closeCourseDrawer()" class="text-app-textMuted hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <button onclick="closeCourseDrawer()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
-      <div id="drawerChaptersList" class="space-y-2 overflow-y-auto flex-1 pr-1">
-        <!-- Injected by JS -->
-      </div>
-
-      <div class="pt-2 text-right border-t border-app-border">
-        <button onclick="closeCourseDrawer()" class="px-4 py-2 bg-slate-900 text-slate-300 text-xs font-semibold rounded-xl cursor-pointer hover:bg-slate-800 transition">Close</button>
-      </div>
+      <div id="drawerChaptersList" class="space-y-2 overflow-y-auto flex-1 pr-1"></div>
+      
+      <button onclick="closeCourseDrawer()" class="w-full py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold cursor-pointer">Close</button>
     </div>
   </div>
 
-
-  <!-- ================= 4. FULL SCREEN ZERO-DISTRACTION FOCUS TIMER ================= -->
-  <div id="fullScreenFocus" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-between p-8 hidden select-none">
-    <div class="text-center pt-8">
-      <span id="focusCategoryBadge" class="text-[11px] font-mono uppercase px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">
-        Course Focus
-      </span>
-      <h2 id="focusMainTitle" class="text-2xl md:text-3xl font-black text-white mt-3 tracking-wide">
-        Topic Name
-      </h2>
-    </div>
-
-    <div class="text-center my-auto">
-      <div id="focusClock" class="text-7xl md:text-9xl font-mono font-black tracking-tight text-white drop-shadow-2xl">
-        25:00
+  <!-- Modal: Self Study -->
+  <div id="selfStudyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Self Study Session</h3>
+        <button onclick="closeSelfStudyModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <p id="focusSubState" class="text-xs font-mono text-slate-500 mt-2 tracking-widest uppercase">Deep Focus In Progress</p>
-    </div>
-
-    <div class="flex items-center gap-3 pb-8">
-      <button id="focusPauseBtn" onclick="toggleFocusPause()" class="px-7 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-mono font-bold text-sm transition cursor-pointer">
-        Pause
-      </button>
-      <button onclick="endFocusEarly()" class="px-7 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-sm shadow-xl shadow-emerald-600/30 transition cursor-pointer">
-        Complete ✓
-      </button>
-      <button onclick="cancelFocusSession()" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950 text-slate-400 hover:text-rose-400 text-xs font-mono transition cursor-pointer">
-        Cancel
-      </button>
-    </div>
-  </div>
-
-
-  <!-- ================= MODAL: ADD COURSE ================= -->
-  <div id="addCourseModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-app-card border border-app-border rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center pb-2 border-b border-app-border">
-        <h3 class="text-sm font-bold text-white uppercase tracking-wide">Create New Course</h3>
-        <button onclick="closeAddCourseModal()" class="text-app-textMuted hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-lg"></i></button>
-      </div>
-
-      <div class="space-y-3">
+      <div class="space-y-3 text-xs">
         <div>
-          <label class="block text-[11px] font-bold text-app-textLight mb-1 uppercase tracking-wider">Course Name</label>
-          <input id="modalCourseTitle" type="text" placeholder="e.g. Deep Learning" class="w-full bg-slate-950 border border-app-border rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+          <label class="block font-bold text-slate-400 mb-1">TOPIC / SUBJECT</label>
+          <input id="selfStudySubject" type="text" placeholder="e.g. System Design / LeetCode" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-400 mb-1">DURATION (MINUTES)</label>
+          <input id="selfStudyMinutes" type="number" value="30" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-mono text-slate-900 dark:text-white focus:outline-none focus:border-amber-500" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeSelfStudyModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-semibold cursor-pointer">Cancel</button>
+        <button onclick="startSelfStudy()" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/30 cursor-pointer">Start Focus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Course -->
+  <div id="addCourseModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Create New Course</h3>
+        <button onclick="closeAddCourseModal()" class="text-slate-400 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-400 mb-1">COURSE NAME</label>
+          <input id="modalCourseTitle" type="text" placeholder="e.g. Deep Learning & LLMs" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-sky-500" />
         </div>
 
-        <div class="space-y-2 pt-2 border-t border-app-border">
-          <label class="block text-[11px] font-bold text-app-textLight uppercase tracking-wider">Add Chapters (In Order)</label>
+        <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <label class="block font-bold text-slate-400">ADD CHAPTERS</label>
           <div class="flex gap-2">
             <div class="relative flex-1">
-              <span id="modalTopicIndex" class="absolute left-3 top-2 text-xs font-mono font-bold text-emerald-400">1.</span>
-              <input id="modalTopicInput" type="text" placeholder="Chapter title..." onkeydown="if(event.key==='Enter') addModalTopic()" class="w-full bg-slate-950 border border-app-border rounded-xl pl-8 pr-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
+              <span id="modalTopicIndex" class="absolute left-3 top-2.5 text-xs font-mono font-bold text-emerald-500">1.</span>
+              <input id="modalTopicInput" type="text" placeholder="Chapter title..." onkeydown="if(event.key==='Enter') addModalTopic()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl pl-7 pr-3 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500" />
             </div>
-            <input id="modalTopicTime" type="number" value="30" class="w-16 bg-slate-950 border border-app-border rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none" title="Target Minutes" />
-            <button onclick="addModalTopic()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3 py-2 rounded-xl text-xs transition cursor-pointer">Add</button>
+            <input id="modalTopicTime" type="number" value="30" class="w-16 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-2 text-center font-mono text-slate-900 dark:text-white" title="Minutes" />
+            <button onclick="addModalTopic()" class="bg-emerald-600 text-white px-3 py-2 rounded-xl font-bold cursor-pointer">Add</button>
           </div>
           <div id="modalTopicPreview" class="space-y-1.5 max-h-32 overflow-y-auto pt-1"></div>
         </div>
       </div>
-
-      <div class="flex justify-end gap-2 pt-3 border-t border-app-border">
-        <button onclick="closeAddCourseModal()" class="px-4 py-2 bg-slate-900 text-app-textLight text-xs rounded-xl cursor-pointer">Cancel</button>
-        <button onclick="saveNewCourse()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition cursor-pointer">Save Course</button>
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+        <button onclick="closeAddCourseModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-semibold cursor-pointer">Cancel</button>
+        <button onclick="saveNewCourse()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold cursor-pointer">Save Course</button>
       </div>
     </div>
   </div>
 
+  <!-- Zero-Distraction Full Screen Timer -->
+  <div id="fullScreenFocus" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-between p-8 hidden select-none">
+    <div class="text-center pt-8">
+      <span id="focusCategoryBadge" class="text-[11px] font-mono uppercase px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Course Focus</span>
+      <h2 id="focusMainTitle" class="text-2xl sm:text-3xl font-black text-white mt-3 tracking-wide">Topic Name</h2>
+    </div>
 
-  <!-- ================= MODAL: SELF STUDY ================= -->
-  <div id="selfStudyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-app-card border border-app-border rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
-      <div class="flex justify-between items-center pb-2 border-b border-app-border">
-        <h3 class="text-sm font-bold text-white uppercase tracking-wide">Self Study Session</h3>
-        <button onclick="closeSelfStudyModal()" class="text-app-textMuted hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-      </div>
+    <div class="text-center my-auto">
+      <div id="focusClock" class="text-7xl sm:text-9xl font-mono font-black text-white drop-shadow-2xl">25:00</div>
+      <p id="focusSubState" class="text-xs font-mono text-slate-500 mt-2 tracking-widest uppercase">Deep Focus In Progress</p>
+    </div>
 
-      <div class="space-y-3">
-        <div>
-          <label class="block text-[11px] font-bold text-app-textLight mb-1 uppercase tracking-wider">Subject / Topic Name</label>
-          <input id="selfStudySubject" type="text" placeholder="e.g. LeetCode / Papers" class="w-full bg-slate-950 border border-app-border rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-amber-500" />
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-app-textLight mb-1 uppercase tracking-wider">Duration (Minutes)</label>
-          <input id="selfStudyMinutes" type="number" value="30" class="w-full bg-slate-950 border border-app-border rounded-xl px-3.5 py-2 text-sm text-white font-mono focus:outline-none focus:border-amber-500" />
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeSelfStudyModal()" class="px-4 py-2 bg-slate-900 text-app-textLight text-xs rounded-xl cursor-pointer">Cancel</button>
-        <button onclick="startSelfStudy()" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shadow transition cursor-pointer">Start Focusing</button>
-      </div>
+    <div class="flex items-center gap-3 pb-8">
+      <button id="focusPauseBtn" onclick="toggleFocusPause()" class="px-6 py-2.5 rounded-xl bg-slate-800 text-amber-400 border border-slate-700 font-mono font-bold text-sm cursor-pointer">Pause</button>
+      <button onclick="endFocusEarly()" class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-mono font-bold text-sm shadow-xl cursor-pointer">Complete ✓</button>
+      <button onclick="cancelFocusSession()" class="px-5 py-2.5 rounded-xl bg-slate-900 text-slate-400 text-xs font-mono cursor-pointer">Cancel</button>
     </div>
   </div>
 
