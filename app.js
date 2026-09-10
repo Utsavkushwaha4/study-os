@@ -174,7 +174,26 @@ function applyTheme(theme) {
   localStorage.setItem('studyos_theme', theme);
 }
 
-// ================= 4. AUTH & SCREEN ROUTING (FIXED PC SIDEBAR BUG) =================
+// ================= 4. AUTH & SCREEN ROUTING (FIXED PC & MOBILE) =================
+function updateResponsiveElements() {
+  const workspaceView = document.getElementById("mainWorkspaceView");
+  const desktopSidebar = document.getElementById("desktopSidebar");
+  const bottomBar = document.getElementById("bottomTaskbar");
+
+  // Agar user logged in hai aur workspace open hai
+  if (workspaceView && !workspaceView.classList.contains("hidden")) {
+    if (window.innerWidth >= 1024) {
+      if (desktopSidebar) desktopSidebar.style.setProperty("display", "flex", "important");
+      if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
+    } else {
+      if (desktopSidebar) desktopSidebar.style.setProperty("display", "none", "important");
+      if (bottomBar) bottomBar.style.setProperty("display", "flex", "important");
+    }
+  }
+}
+
+window.addEventListener("resize", updateResponsiveElements);
+
 function showView(screen) {
   const authView = document.getElementById("authGatewayView");
   const workspaceView = document.getElementById("mainWorkspaceView");
@@ -185,35 +204,16 @@ function showView(screen) {
     authView.classList.add("hidden");
     workspaceView.classList.remove("hidden");
     
-    // Show sidebar ONLY AFTER login on laptop/desktop
-    if (desktopSidebar) {
-      desktopSidebar.classList.remove("hidden");
-      desktopSidebar.classList.add("lg:flex");
-    }
-
-    // Show mobile taskbar ONLY AFTER login on mobile
-    if (bottomBar) {
-      bottomBar.classList.remove("hidden");
-      bottomBar.classList.add("flex");
-    }
-
+    updateResponsiveElements();
     updateGreeting();
     renderWeeklyCalendar();
     renderWorkspace();
   } else {
     workspaceView.classList.add("hidden");
     
-    // Strictly hide desktop sidebar on login screen
-    if (desktopSidebar) {
-      desktopSidebar.classList.add("hidden");
-      desktopSidebar.classList.remove("lg:flex");
-    }
-
-    // Strictly hide mobile taskbar on login screen
-    if (bottomBar) {
-      bottomBar.classList.add("hidden");
-      bottomBar.classList.remove("flex");
-    }
+    // Login Screen: Dono nav bars completely hidden
+    if (desktopSidebar) desktopSidebar.style.setProperty("display", "none", "important");
+    if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
 
     authView.classList.remove("hidden");
   }
@@ -594,7 +594,10 @@ window.startSelfStudy = function() {
 
 function launchFullScreen() {
   document.getElementById("mainWorkspaceView").classList.add("hidden");
-  document.getElementById("bottomTaskbar").classList.add("hidden");
+  
+  const bottomBar = document.getElementById("bottomTaskbar");
+  if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
+  
   document.getElementById("fullScreenFocus").classList.remove("hidden");
   document.getElementById("cheatWarningBanner").classList.add("hidden");
 
@@ -682,8 +685,8 @@ window.cancelFocusSession = function() {
 function exitFullScreen() {
   document.getElementById("fullScreenFocus").classList.add("hidden");
   document.getElementById("mainWorkspaceView").classList.remove("hidden");
-  document.getElementById("bottomTaskbar").classList.remove("hidden");
   
+  updateResponsiveElements();
   releaseScreenWakeLock();
   stopAmbientNoise();
 

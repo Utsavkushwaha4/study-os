@@ -17,18 +17,28 @@
   background: #080d1a;
 }
 
-/* Hide Scrollbar for Horizontal Swipe Container (Mobile Metric Cards) */
+/* Hide Scrollbars for Swipe */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Card Glow Effect on Hover */
+/* Card Glow Effect */
 .course-card-glow:hover {
   border-color: rgba(59, 130, 246, 0.4);
   box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
+}
+
+/* HARD MOBILE LOCK: Sidebar can NEVER show on phones or tablets */
+@media (max-width: 1023px) {
+  #desktopSidebar {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
 }
