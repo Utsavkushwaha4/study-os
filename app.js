@@ -235,7 +235,6 @@ window.handleGoogleSignIn = async function() {
     const res = await signInWithPopup(auth, provider);
     currentUser = res.user;
 
-    // 🔥 Sync User Profile to Firestore
     if (db) {
       await setDoc(doc(db, "users", currentUser.uid), {
         displayName: currentUser.displayName || "Scholar",
@@ -474,7 +473,9 @@ function renderCourses() {
     const card = document.createElement("div");
     card.id = `courseCard_${course.id}`;
     card.className = `course-card-morph ${theme.lightBg} ${theme.darkBg} border ${theme.border} rounded-3xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 shadow-sm cursor-pointer select-none`;
-    card.onclick = () => window.triggerCardMorph(card, course.id, theme);
+    
+    // Wave Aura + FLIP Morph on Tap
+    card.onclick = (e) => window.triggerCardMorph(card, course.id, theme, e);
 
     card.innerHTML = `
       <div class="space-y-2.5">
@@ -537,10 +538,21 @@ function renderHistory() {
   });
 }
 
-// ================= 8. FLIP SHARED-ELEMENT MORPH ENGINE =================
-window.triggerCardMorph = function(cardElement, courseId, theme) {
+// ================= 8. ADVANCED FLIP MORPH + AURA RECOIL =================
+window.triggerCardMorph = function(cardElement, courseId, theme, event) {
   const course = appState.courses.find(c => c.id === courseId);
   if (!course) return;
+
+  // 1. Wave Pressure Glow at tap location
+  if (event) {
+    const rect = cardElement.getBoundingClientRect();
+    const aura = document.createElement("div");
+    aura.className = "pressure-aura";
+    aura.style.left = `${event.clientX - rect.left}px`;
+    aura.style.top = `${event.clientY - rect.top}px`;
+    cardElement.appendChild(aura);
+    setTimeout(() => aura.remove(), 500);
+  }
 
   morphActiveCard = cardElement;
   morphCardRect = cardElement.getBoundingClientRect();
@@ -595,14 +607,15 @@ window.triggerCardMorph = function(cardElement, courseId, theme) {
   // Force Layout Reflow
   surface.offsetHeight;
 
-  // STEP 2: Animate smoothly to Full Screen + Push Back Main Workspace
-  surface.style.transition = "all 0.42s var(--fluid-spring)";
+  // STEP 2: Animate smoothly to Full Screen + 3D Depth Layering
+  surface.style.transition = "all 0.42s cubic-bezier(0.19, 1, 0.22, 1)";
   surface.style.top = "0px";
   surface.style.left = "0px";
   surface.style.width = "100vw";
   surface.style.height = "100vh";
   surface.style.borderRadius = "0px";
 
+  // Parallax Tilt & Recoil Depth on Background Workspace
   workspace.classList.add("workspace-pushed-back");
   surface.classList.add("surface-active");
 };
@@ -616,7 +629,7 @@ window.collapseMorphSurface = function() {
   surface.classList.remove("surface-active");
 
   // Animate Surface back into the card's original rectangle
-  surface.style.transition = "all 0.38s var(--fluid-spring)";
+  surface.style.transition = "all 0.38s cubic-bezier(0.19, 1, 0.22, 1)";
   surface.style.top = `${morphCardRect.top}px`;
   surface.style.left = `${morphCardRect.left}px`;
   surface.style.width = `${morphCardRect.width}px`;
@@ -633,7 +646,48 @@ window.collapseMorphSurface = function() {
   }, 380);
 };
 
-// ================= 9. STRICT FOCUS ENGINE =================
+// ================= 9. RUBBER-BAND ELASTIC OVERSCROLL ENGINE =================
+// Pointer tracking for smooth rubber-band bounce on dragging
+let touchStartY = 0;
+let isDraggingVertical = false;
+
+window.addEventListener("pointerdown", (e) => {
+  const workspace = document.getElementById("mainWorkspaceView");
+  if (!workspace || workspace.classList.contains("hidden") || workspace.classList.contains("workspace-pushed-back")) return;
+
+  if (window.scrollY === 0) {
+    touchStartY = e.clientY;
+    isDraggingVertical = true;
+  }
+});
+
+window.addEventListener("pointermove", (e) => {
+  if (!isDraggingVertical) return;
+  const diffY = e.clientY - touchStartY;
+  const workspace = document.getElementById("mainWorkspaceView");
+
+  // Elastic pull-down at the top
+  if (diffY > 0 && window.scrollY === 0) {
+    const rubberBandY = Math.pow(diffY, 0.78); // Physics damping curve
+    workspace.style.transition = "none";
+    workspace.style.transform = `translateY(${rubberBandY}px) scale(${1 + rubberBandY * 0.0003})`;
+  }
+});
+
+function releaseRubberBand() {
+  if (!isDraggingVertical) return;
+  isDraggingVertical = false;
+  const workspace = document.getElementById("mainWorkspaceView");
+  if (workspace && !workspace.classList.contains("workspace-pushed-back")) {
+    workspace.style.transition = "transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)";
+    workspace.style.transform = "none";
+  }
+}
+
+window.addEventListener("pointerup", releaseRubberBand);
+window.addEventListener("pointercancel", releaseRubberBand);
+
+// ================= 10. STRICT FOCUS ENGINE =================
 window.startCourseFocus = function(courseId, topicId, title, minutes) {
   currentSession = {
     courseId,
@@ -863,7 +917,7 @@ function logSessionComplete() {
   persist();
 }
 
-// ================= 10. MODAL ACTIONS =================
+// ================= 11. MODAL ACTIONS =================
 window.openAddCourseModal = function() {
   tempTopics = [];
   document.getElementById("modalCourseTitle").value = "";

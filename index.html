@@ -56,7 +56,6 @@
   <!-- ================= VIEW 1: AUTH GATEWAY ================= -->
   <section id="authGatewayView" class="w-full min-h-screen flex flex-col items-center justify-center p-5 relative z-10">
     <div class="w-full max-w-sm my-auto py-4 space-y-6">
-      
       <div class="text-center space-y-3">
         <div class="relative w-36 h-36 mx-auto flex items-center justify-center">
           <div class="w-32 h-32 rounded-full bg-gradient-to-b from-sky-100 to-indigo-50 dark:from-slate-800 dark:to-slate-900 border border-sky-200/60 dark:border-slate-700 flex items-center justify-center shadow-inner">
@@ -151,14 +150,13 @@
           <i class="fa-solid fa-right-from-bracket text-xs"></i>
         </button>
       </div>
-
       <div class="text-center text-[10px] font-mono text-slate-400 pt-1">
         Made by <span class="font-bold text-slate-600 dark:text-slate-300">Utsav Kushwaha</span>
       </div>
     </div>
   </aside>
 
-  <!-- ================= VIEW 3: MAIN WORKSPACE ================= -->
+  <!-- ================= VIEW 3: MAIN WORKSPACE (WITH 3D DEPTH + PARALLAX DRAG) ================= -->
   <div id="mainWorkspaceView" class="hidden flex-1 w-full max-w-6xl mx-auto px-4 lg:px-10 pt-0 pb-28 lg:pb-12 relative z-10">
 
     <!-- Sticky Mobile App Bar -->
@@ -217,7 +215,7 @@
     <div class="w-full space-y-6">
       <!-- Hero Banner & Today's Focus -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-100 dark:from-[#0d1e38] dark:via-[#0c2642] dark:to-[#0f304d] border border-teal-100 dark:border-slate-700 p-4 sm:p-6 flex items-center justify-between shadow-sm">
+        <div class="lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-100 dark:from-[#0d1e38] dark:via-[#0c2642] dark:to-[#0f304d] border border-teal-100 dark:border-slate-700 p-4.5 p-4 sm:p-6 flex items-center justify-between shadow-sm">
           <div class="space-y-1 relative z-10">
             <h2 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               <span id="heroGreetingText">Good Evening</span>, <span id="dashUserName" class="text-teal-600 dark:text-sky-400">Scholar</span> 👋
