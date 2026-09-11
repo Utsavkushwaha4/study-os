@@ -174,13 +174,12 @@ function applyTheme(theme) {
   localStorage.setItem('studyos_theme', theme);
 }
 
-// ================= 4. AUTH & SCREEN ROUTING (FIXED PC & MOBILE) =================
+// ================= 4. AUTH & SCREEN ROUTING =================
 function updateResponsiveElements() {
   const workspaceView = document.getElementById("mainWorkspaceView");
   const desktopSidebar = document.getElementById("desktopSidebar");
   const bottomBar = document.getElementById("bottomTaskbar");
 
-  // Agar user logged in hai aur workspace open hai
   if (workspaceView && !workspaceView.classList.contains("hidden")) {
     if (window.innerWidth >= 1024) {
       if (desktopSidebar) desktopSidebar.style.setProperty("display", "flex", "important");
@@ -211,7 +210,6 @@ function showView(screen) {
   } else {
     workspaceView.classList.add("hidden");
     
-    // Login Screen: Dono nav bars completely hidden
     if (desktopSidebar) desktopSidebar.style.setProperty("display", "none", "important");
     if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
 
@@ -232,6 +230,20 @@ window.handleGoogleSignIn = async function() {
   try {
     const res = await signInWithPopup(auth, provider);
     currentUser = res.user;
+
+    // 🔥 User Details + Profile Data Firestore me save karna
+    if (db) {
+      await setDoc(doc(db, "users", currentUser.uid), {
+        displayName: currentUser.displayName || "Scholar",
+        email: currentUser.email || "",
+        photoURL: currentUser.photoURL || "",
+        lastLogin: new Date().toLocaleString(),
+        courses: appState.courses,
+        history: appState.history,
+        streak: appState.streak
+      }, { merge: true });
+    }
+
     updateUserInterface();
     showView("workspace");
   } catch (err) {
@@ -379,6 +391,9 @@ function persist() {
   if (currentUser && db && currentUser.uid !== "guest_user") {
     const userDocRef = doc(db, "users", currentUser.uid);
     setDoc(userDocRef, {
+      displayName: currentUser.displayName || "Scholar",
+      email: currentUser.email || "",
+      photoURL: currentUser.photoURL || "",
       courses: appState.courses,
       history: appState.history,
       dailyTasks: appState.dailyTasks || [],
