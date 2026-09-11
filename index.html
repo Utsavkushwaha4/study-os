@@ -354,43 +354,41 @@
     </div>
   </div>
 
-  <!-- ================= FLOATING TRANSPARENT GLASS CAPSULE DOCK (MOBILE ONLY) ================= -->
-  <div id="bottomTaskbarWrapper" class="hidden fixed bottom-5 left-0 right-0 z-40 justify-center px-3 pointer-events-none lg:hidden">
-    <nav id="bottomTaskbar" class="pointer-events-auto glass-dock px-2.5 py-1.5 rounded-full flex items-center gap-1.5 sm:gap-2">
+  <!-- ================= FLOATING LIQUID GLASS TASKBAR (MOBILE ONLY) ================= -->
+  <div id="bottomTaskbarWrapper" class="hidden fixed bottom-5 left-0 right-0 z-40 justify-center px-4 pointer-events-none lg:hidden">
+    <nav id="bottomTaskbar" class="pointer-events-auto liquid-glass-dock w-full max-w-[390px] h-[64px] px-2.5 rounded-[32px] flex items-center justify-between">
       
-      <!-- 1. Home (Active by Default) -->
-      <button onclick="switchDockTab(this, 'home')" class="dock-tab-btn dock-active-pill rounded-full flex items-center justify-center gap-2 cursor-pointer">
-        <i class="fa-solid fa-house text-sm"></i>
-        <span class="dock-tab-title text-xs font-bold whitespace-nowrap inline-block">Home</span>
+      <!-- 1. Home (Today) -->
+      <button onclick="switchDockTab(this, 'home')" class="nav-tab-item tab-active cursor-pointer">
+        <i class="fa-solid fa-house text-base"></i>
+        <span class="dock-tab-title text-[10px] font-bold tracking-tight mt-0.5">Today</span>
       </button>
 
       <!-- 2. Courses -->
-      <button onclick="switchDockTab(this, 'courses')" class="dock-tab-btn dock-circle-btn rounded-full flex items-center justify-center gap-2 cursor-pointer" title="Courses">
-        <i class="fa-solid fa-book text-sm"></i>
-        <span class="dock-tab-title text-xs font-bold whitespace-nowrap hidden">Courses</span>
+      <button onclick="switchDockTab(this, 'courses')" class="nav-tab-item cursor-pointer" title="Courses">
+        <i class="fa-solid fa-book-open text-base"></i>
+        <span class="dock-tab-title text-[10px] font-semibold tracking-tight mt-0.5">Courses</span>
       </button>
 
-      <!-- 3. Center Hero Focus Button (Floating & Illuminated) -->
-      <div class="relative -translate-y-3 flex items-center justify-center mx-0.5">
-        <div class="focus-glow-ring"></div>
-        <button onclick="openSelfStudyModal()" class="focus-hero-btn rounded-full flex flex-col items-center justify-center cursor-pointer shadow-lg" title="Strict Focus Session">
-          <i class="fa-solid fa-shield-halved text-base"></i>
-          <span class="text-[7.5px] font-mono font-bold tracking-tighter uppercase leading-none mt-0.5">Focus</span>
-        </button>
-      </div>
+      <!-- 3. Focus (Clean Balanced Layout) -->
+      <button onclick="switchDockTab(this, 'focus')" class="nav-tab-item cursor-pointer" title="Strict Focus">
+        <i class="fa-solid fa-shield-halved text-base"></i>
+        <span class="dock-tab-title text-[10px] font-semibold tracking-tight mt-0.5">Focus</span>
+      </button>
 
       <!-- 4. History -->
-      <button onclick="switchDockTab(this, 'history')" class="dock-tab-btn dock-circle-btn rounded-full flex items-center justify-center gap-2 cursor-pointer" title="History">
-        <i class="fa-solid fa-chart-simple text-sm"></i>
-        <span class="dock-tab-title text-xs font-bold whitespace-nowrap hidden">History</span>
+      <button onclick="switchDockTab(this, 'history')" class="nav-tab-item cursor-pointer" title="History">
+        <i class="fa-solid fa-chart-simple text-base"></i>
+        <span class="dock-tab-title text-[10px] font-semibold tracking-tight mt-0.5">History</span>
       </button>
 
       <!-- Divider -->
-      <div class="w-[1px] h-5 bg-slate-300 dark:bg-slate-700/60 mx-0.5"></div>
+      <div class="w-[1px] h-5 bg-white/20 mx-0.5"></div>
 
       <!-- 5. Exit / Logout -->
-      <button onclick="handleSignOut()" class="dock-exit-btn rounded-full flex items-center justify-center cursor-pointer" title="Exit / Logout">
-        <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+      <button onclick="handleSignOut()" class="nav-tab-item nav-exit-btn cursor-pointer" title="Exit / Logout">
+        <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
+        <span class="text-[10px] font-semibold tracking-tight mt-0.5">Exit</span>
       </button>
 
     </nav>
@@ -454,43 +452,105 @@
     </div>
   </div>
 
-  <!-- Strict Focus Fullscreen -->
-  <div id="fullScreenFocus" class="fixed inset-0 bg-[#070b14] z-50 flex flex-col items-center justify-between p-6 sm:p-10 hidden select-none">
-    <div class="w-full max-w-md flex items-center justify-between">
+  <!-- ================= VIEW 4: STRICT FOCUS FULLSCREEN WITH PANDA & REAL-TIME CLOCK ================= -->
+  <div id="fullScreenFocus" class="fixed inset-0 bg-[#070b14] z-50 flex flex-col items-center justify-between p-5 sm:p-8 hidden select-none overflow-hidden">
+    
+    <!-- Top Bar: Guards + Real World Time Clock -->
+    <div class="w-full max-w-md flex items-center justify-between z-10">
       <div class="flex items-center gap-2">
         <span class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1.5">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Tab Guard Active</span>
+          <span>Guarded</span>
         </span>
-        <span id="wakeLockStatus" class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-900 text-slate-400 border border-slate-800">
-          Screen Lock: Active
+        
+        <!-- 🔥 REAL-WORLD LIVE CLOCK (IDEA 1) 🔥 -->
+        <span id="focusRealWorldTime" class="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full bg-slate-900 text-sky-400 border border-slate-800 flex items-center gap-1.5 shadow-sm">
+          <i class="fa-regular fa-clock text-[10px]"></i>
+          <span id="liveClockText">--:-- --</span>
         </span>
       </div>
-      <button id="soundToggleBtn" onclick="toggleSoundEngine()" class="px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-xs font-mono flex items-center gap-1.5 hover:text-white cursor-pointer">
+
+      <button id="soundToggleBtn" onclick="toggleSoundEngine()" class="px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-xs font-mono flex items-center gap-1.5 hover:text-white cursor-pointer">
         <i id="soundIcon" class="fa-solid fa-volume-xmark"></i>
         <span id="soundLabel">Audio Off</span>
       </button>
     </div>
 
-    <div id="cheatWarningBanner" class="w-full max-w-md bg-rose-950/90 border border-rose-600 rounded-2xl p-3.5 text-center space-y-1 shadow-2xl transition-all hidden">
+    <!-- Distraction Banner -->
+    <div id="cheatWarningBanner" class="w-full max-w-md bg-rose-950/90 border border-rose-600 rounded-2xl p-3 text-center space-y-1 shadow-2xl transition-all hidden z-10">
       <div class="flex items-center justify-center gap-2 text-rose-400 font-bold text-xs">
         <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
         <span>DISTRACTION DETECTED! SESSION PAUSED</span>
       </div>
-      <p class="text-[11px] text-rose-200">Aapne tab switch ya minimize kiya tha. Focus break counter increase ho gaya hai.</p>
+      <p class="text-[11px] text-rose-200">Aapne tab switch kiya tha. Padhai par focus karein!</p>
     </div>
 
-    <div class="text-center space-y-3 my-auto">
-      <span id="focusCategoryBadge" class="text-xs font-mono uppercase tracking-widest text-sky-400 bg-sky-950/60 border border-sky-800/80 px-3.5 py-1 rounded-full">Course Focus</span>
-      <h2 id="focusMainTitle" class="text-2xl sm:text-3xl font-black text-white tracking-wide">Topic Name</h2>
-      <div id="focusClock" class="text-7xl sm:text-9xl font-black font-mono tracking-tight text-white drop-shadow-2xl">25:00</div>
-      <p id="focusSubState" class="text-xs font-mono text-slate-500 uppercase tracking-widest">Deep Focus In Progress</p>
+    <!-- Center Stage: Timer + 🔥 ANIMATED STUDY PANDA (IDEA 2) 🔥 -->
+    <div class="text-center space-y-3 my-auto relative z-10 flex flex-col items-center">
+      
+      <!-- Animated Study Panda Mascot -->
+      <div class="panda-box w-28 h-24 relative flex items-center justify-center">
+        <svg viewBox="0 0 120 100" class="w-full h-full drop-shadow-xl">
+          <!-- Panda Ears -->
+          <circle cx="28" cy="24" r="14" fill="#0f172a" class="panda-ear-left" />
+          <circle cx="92" cy="24" r="14" fill="#0f172a" />
+          <!-- Head -->
+          <ellipse cx="60" cy="46" rx="42" ry="34" fill="#ffffff" />
+          <!-- Eye Patches -->
+          <ellipse cx="44" cy="44" rx="10" ry="13" fill="#0f172a" transform="rotate(-15 44 44)" />
+          <ellipse cx="76" cy="44" rx="10" ry="13" fill="#0f172a" transform="rotate(15 76 44)" />
+          <!-- Eye Pupils (Looking at screen) -->
+          <circle cx="46" cy="46" r="3.5" fill="#ffffff" />
+          <circle cx="74" cy="46" r="3.5" fill="#ffffff" />
+          <!-- Nose & Mouth -->
+          <ellipse cx="60" cy="56" rx="5" ry="3.5" fill="#0f172a" />
+          <path d="M 57 60 Q 60 63 63 60" stroke="#0f172a" stroke-width="1.8" fill="none" />
+          <!-- Body & Arms -->
+          <path d="M 30 78 Q 60 68 90 78 L 95 100 L 25 100 Z" fill="#0f172a" />
+          <!-- Laptop Screen -->
+          <rect x="36" y="68" width="48" height="28" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+          <!-- Glowing Code on Screen -->
+          <line x1="42" y1="74" x2="65" y2="74" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" />
+          <line x1="42" y1="79" x2="72" y2="79" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" />
+          <line x1="42" y1="84" x2="58" y2="84" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" />
+          <!-- Paws / Hands Typing -->
+          <g class="panda-hands">
+            <ellipse cx="40" cy="85" rx="6" ry="5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5" />
+            <ellipse cx="80" cy="85" rx="6" ry="5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5" />
+          </g>
+        </svg>
+      </div>
+
+      <span id="focusCategoryBadge" class="text-xs font-mono uppercase tracking-widest text-sky-400 bg-sky-950/60 border border-sky-800/80 px-3 py-0.5 rounded-full">
+        Course Focus
+      </span>
+
+      <h2 id="focusMainTitle" class="text-xl sm:text-2xl font-black text-white tracking-wide max-w-xs truncate">
+        Topic Name
+      </h2>
+
+      <!-- Big Countdown Clock -->
+      <div id="focusClock" class="text-7xl sm:text-8xl font-black font-mono tracking-tight text-white drop-shadow-2xl">
+        25:00
+      </div>
+
+      <p id="focusSubState" class="text-xs font-mono text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 justify-center">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+        <span>Deep Focus In Progress</span>
+      </p>
     </div>
 
-    <div class="w-full max-w-md flex items-center gap-3">
-      <button id="focusPauseBtn" onclick="toggleFocusPause()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-mono font-bold text-xs rounded-xl cursor-pointer">Pause</button>
-      <button onclick="endFocusEarly()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 cursor-pointer">Complete ✓</button>
-      <button onclick="cancelFocusSession()" class="py-3 px-4 bg-slate-900 hover:bg-rose-950 text-slate-400 hover:text-rose-400 font-mono text-xs rounded-xl cursor-pointer">Cancel</button>
+    <!-- Bottom Controls -->
+    <div class="w-full max-w-md flex items-center gap-3 z-10">
+      <button id="focusPauseBtn" onclick="toggleFocusPause()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-mono font-bold text-xs rounded-xl cursor-pointer">
+        Pause
+      </button>
+      <button onclick="endFocusEarly()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 cursor-pointer">
+        Complete ✓
+      </button>
+      <button onclick="cancelFocusSession()" class="py-3 px-4 bg-slate-900 hover:bg-rose-950 text-slate-400 hover:text-rose-400 font-mono text-xs rounded-xl cursor-pointer">
+        Cancel
+      </button>
     </div>
   </div>
 

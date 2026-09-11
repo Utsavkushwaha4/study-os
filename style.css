@@ -3,16 +3,13 @@
   width: 5px;
   height: 5px;
 }
-
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: #334155;
 }
-
 ::-webkit-scrollbar-track {
   background: #080d1a;
 }
@@ -36,113 +33,98 @@
   }
 }
 
-/* ================= TRANSPARENT CAPSULE DOCK STYLES ================= */
-.glass-dock {
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+/* ================= LIQUID GLASS CAPSULE DOCK ================= */
+.liquid-glass-dock {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow: 
+    0 20px 45px -10px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.45);
 }
 
-.dark .glass-dock {
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+.dark .liquid-glass-dock {
+  background: rgba(18, 26, 43, 0.42);
+  backdrop-filter: blur(32px) saturate(210%);
+  -webkit-backdrop-filter: blur(32px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.65),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.22);
 }
 
-/* Regular Dock Circle Buttons */
-.dock-circle-btn {
-  width: 42px;
-  height: 42px;
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  color: #475569;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dark .dock-circle-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
-}
-
-.dark .dock-circle-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-}
-
-/* Active Expanding Pill Button */
-.dock-active-pill {
-  height: 42px;
-  padding-left: 16px;
-  padding-right: 16px;
-  background: #0f172a;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dark .dock-active-pill {
-  background: rgba(255, 255, 255, 0.95);
-  color: #090d16;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.25);
-}
-
-/* Elevated Center Hero Focus Button */
-.focus-hero-btn {
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.45);
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
-}
-
-.focus-hero-btn:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 14px 28px rgba(245, 158, 11, 0.6);
-}
-
-.focus-hero-btn:active {
-  transform: translateY(2px) scale(0.95);
-}
-
-/* Focus Pulse Ring */
-.focus-glow-ring {
-  position: absolute;
-  inset: -4px;
+/* Nav Tab Item */
+.nav-tab-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  min-width: 58px;
+  padding: 4px 6px;
   border-radius: 9999px;
-  border: 1.5px solid rgba(245, 158, 11, 0.5);
-  animation: pulse-focus-ring 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
-  pointer-events: none;
+  color: rgba(255, 255, 255, 0.75);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-@keyframes pulse-focus-ring {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.18); opacity: 0; }
-  100% { transform: scale(1.18); opacity: 0; }
+.nav-tab-item:active {
+  transform: scale(0.92);
 }
 
-/* Exit / Logout Glass Button */
-.dock-exit-btn {
-  width: 42px;
-  height: 42px;
-  background: rgba(244, 63, 94, 0.12);
-  border: 1px solid rgba(244, 63, 94, 0.25);
-  color: #f43f5e;
+.nav-tab-item.tab-active {
+  color: #38bdf8 !important;
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: 
+    0 8px 20px -4px rgba(0, 0, 0, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.dark .nav-tab-item.tab-active {
+  color: #38bdf8 !important;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: 
+    0 10px 24px -4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-exit-btn {
+  color: rgba(244, 63, 94, 0.85);
   transition: all 0.2s ease;
 }
-
-.dock-exit-btn:hover {
-  background: rgba(244, 63, 94, 0.22);
+.nav-exit-btn:hover {
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.15);
 }
 
-.dock-exit-btn:active {
-  transform: scale(0.92);
+/* ================= ANIMATED STUDY PANDA (CSS SVG) ================= */
+.panda-box {
+  animation: panda-sway 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes panda-sway {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(1.5deg); }
+  100% { transform: translateY(0px) rotate(-1deg); }
+}
+
+.panda-hands {
+  animation: typing-paws 0.45s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes typing-paws {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-2px); }
+}
+
+.panda-ear-left {
+  animation: ear-wiggle 4s ease-in-out infinite;
+}
+@keyframes ear-wiggle {
+  0%, 90%, 100% { transform: rotate(0deg); }
+  95% { transform: rotate(-8deg); }
 }

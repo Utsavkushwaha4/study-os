@@ -101,6 +101,7 @@ let currentSession = {
   totalMinutes: 25,
   remainingSeconds: 25 * 60,
   intervalId: null,
+  realClockIntervalId: null,
   isPaused: false
 };
 
@@ -528,26 +529,21 @@ function renderHistory() {
   });
 }
 
-// ================= 8. CAPSULE DOCK TAB CONTROLLER =================
+// ================= 8. LIQUID GLASS DOCK CONTROLLER =================
 window.switchDockTab = function(btnElement, tabName) {
-  // Reset all tabs to circular glass buttons
-  document.querySelectorAll('.dock-tab-btn').forEach(button => {
-    button.className = "dock-tab-btn dock-circle-btn rounded-full flex items-center justify-center gap-2 cursor-pointer";
-    const label = button.querySelector('.dock-tab-title');
-    if (label) label.classList.add('hidden');
+  document.querySelectorAll('.nav-tab-item').forEach(item => {
+    item.classList.remove('tab-active');
   });
 
-  // Expand clicked button to solid pill
-  btnElement.className = "dock-tab-btn dock-active-pill rounded-full flex items-center justify-center gap-2 cursor-pointer";
-  const activeLabel = btnElement.querySelector('.dock-tab-title');
-  if (activeLabel) activeLabel.classList.remove('hidden');
+  btnElement.classList.add('tab-active');
 
-  // Smooth scroll to sections
   if (tabName === 'home') {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (tabName === 'courses') {
     const el = document.getElementById('coursesSection');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
+  } else if (tabName === 'focus') {
+    window.openSelfStudyModal();
   } else if (tabName === 'history') {
     const el = document.getElementById('historySection');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -596,7 +592,7 @@ window.closeCourseDrawer = function() {
   document.getElementById("courseDrawerModal").classList.add("hidden");
 };
 
-// ================= 10. STRICT FOCUS ENGINE =================
+// ================= 10. STRICT FOCUS ENGINE (REAL-TIME CLOCK & MASCOT) =================
 window.startCourseFocus = function(courseId, topicId, title, minutes) {
   currentSession = {
     courseId,
@@ -606,6 +602,7 @@ window.startCourseFocus = function(courseId, topicId, title, minutes) {
     totalMinutes: minutes,
     remainingSeconds: minutes * 60,
     intervalId: null,
+    realClockIntervalId: null,
     isPaused: false
   };
   launchFullScreen();
@@ -623,12 +620,20 @@ window.startSelfStudy = function() {
     totalMinutes: mins,
     remainingSeconds: mins * 60,
     intervalId: null,
+    realClockIntervalId: null,
     isPaused: false
   };
 
   window.closeSelfStudyModal();
   launchFullScreen();
 };
+
+function updateRealWorldClock() {
+  const clockElem = document.getElementById("liveClockText");
+  if (!clockElem) return;
+  const now = new Date();
+  clockElem.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
 
 function launchFullScreen() {
   document.getElementById("mainWorkspaceView").classList.add("hidden");
@@ -642,15 +647,24 @@ function launchFullScreen() {
   document.getElementById("focusCategoryBadge").innerText = currentSession.category;
   document.getElementById("focusMainTitle").innerText = currentSession.title;
   document.getElementById("focusPauseBtn").innerText = "Pause";
-  document.getElementById("focusSubState").innerText = "Deep Focus In Progress";
+  document.getElementById("focusSubState").innerHTML = `
+    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+    <span>Deep Focus In Progress</span>
+  `;
 
   updateClockDisplay();
+  updateRealWorldClock();
   requestScreenWakeLock();
 
   if (document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(() => {});
   }
 
+  // Real world live clock interval
+  if (currentSession.realClockIntervalId) clearInterval(currentSession.realClockIntervalId);
+  currentSession.realClockIntervalId = setInterval(updateRealWorldClock, 1000);
+
+  // Study timer countdown interval
   if (currentSession.intervalId) clearInterval(currentSession.intervalId);
   currentSession.intervalId = setInterval(tickFocusClock, 1000);
 }
@@ -661,6 +675,7 @@ function tickFocusClock() {
     updateClockDisplay();
   } else {
     clearInterval(currentSession.intervalId);
+    clearInterval(currentSession.realClockIntervalId);
     logSessionComplete();
     alert(`Congratulations! Session completed: ${currentSession.title}`);
     exitFullScreen();
@@ -682,7 +697,10 @@ document.addEventListener("visibilitychange", () => {
     
     document.getElementById("cheatWarningBanner").classList.remove("hidden");
     document.getElementById("focusPauseBtn").innerText = "Resume";
-    document.getElementById("focusSubState").innerText = "Session Paused (Distracted)";
+    document.getElementById("focusSubState").innerHTML = `
+      <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+      <span class="text-amber-400">Session Paused (Distracted)</span>
+    `;
   }
 });
 
@@ -693,14 +711,20 @@ window.toggleFocusPause = function() {
   if (currentSession.isPaused) {
     currentSession.isPaused = false;
     btn.innerText = "Pause";
-    sub.innerText = "Deep Focus In Progress";
+    sub.innerHTML = `
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+      <span>Deep Focus In Progress</span>
+    `;
     document.getElementById("cheatWarningBanner").classList.add("hidden");
     requestScreenWakeLock();
     currentSession.intervalId = setInterval(tickFocusClock, 1000);
   } else {
     currentSession.isPaused = true;
     btn.innerText = "Resume";
-    sub.innerText = "Session Paused";
+    sub.innerHTML = `
+      <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+      <span class="text-amber-400">Session Paused</span>
+    `;
     releaseScreenWakeLock();
     clearInterval(currentSession.intervalId);
   }
@@ -708,6 +732,7 @@ window.toggleFocusPause = function() {
 
 window.endFocusEarly = function() {
   clearInterval(currentSession.intervalId);
+  if (currentSession.realClockIntervalId) clearInterval(currentSession.realClockIntervalId);
   logSessionComplete();
   exitFullScreen();
 };
@@ -715,6 +740,7 @@ window.endFocusEarly = function() {
 window.cancelFocusSession = function() {
   if (confirm("Cancel focus session? Progress will not be saved.")) {
     clearInterval(currentSession.intervalId);
+    if (currentSession.realClockIntervalId) clearInterval(currentSession.realClockIntervalId);
     exitFullScreen();
   }
 };
@@ -723,6 +749,7 @@ function exitFullScreen() {
   document.getElementById("fullScreenFocus").classList.add("hidden");
   document.getElementById("mainWorkspaceView").classList.remove("hidden");
   
+  if (currentSession.realClockIntervalId) clearInterval(currentSession.realClockIntervalId);
   updateResponsiveElements();
   releaseScreenWakeLock();
   stopAmbientNoise();
@@ -738,8 +765,6 @@ async function requestScreenWakeLock() {
   try {
     if ('wakeLock' in navigator) {
       wakeLockSentinel = await navigator.wakeLock.request('screen');
-      const badge = document.getElementById("wakeLockStatus");
-      if (badge) badge.innerText = "Screen Lock: Active 💡";
     }
   } catch (err) {
     console.warn("WakeLock request error:", err.message);
@@ -750,8 +775,6 @@ function releaseScreenWakeLock() {
   if (wakeLockSentinel) {
     wakeLockSentinel.release().then(() => {
       wakeLockSentinel = null;
-      const badge = document.getElementById("wakeLockStatus");
-      if (badge) badge.innerText = "Screen Lock: Idle";
     });
   }
 }
