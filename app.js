@@ -35,9 +35,7 @@ try {
     auth = getAuth(app);
     db = getFirestore(app);
     provider = new GoogleAuthProvider();
-    provider.setCustomParameters({
-      prompt: 'select_account'
-    });
+    provider.setCustomParameters({ prompt: 'select_account' });
   }
 } catch (e) {
   console.warn("Firebase running in offline mode.");
@@ -111,6 +109,10 @@ let audioCtx = null;
 let noiseSource = null;
 let isAudioPlaying = false;
 
+// Shared Element Morph References
+let morphActiveCard = null;
+let morphCardRect = null;
+
 const courseThemes = [
   {
     lightBg: "bg-emerald-50/60",
@@ -119,7 +121,8 @@ const courseThemes = [
     badge: "bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
     bar: "bg-emerald-500",
     btn: "bg-emerald-600 hover:bg-emerald-500 text-white",
-    emoji: "📝"
+    emoji: "📝",
+    surfaceBg: "#091b15"
   },
   {
     lightBg: "bg-pink-50/60",
@@ -128,7 +131,8 @@ const courseThemes = [
     badge: "bg-pink-100 dark:bg-pink-950 text-pink-600 dark:text-pink-400",
     bar: "bg-rose-500",
     btn: "bg-rose-500 hover:bg-rose-600 text-white",
-    emoji: "💻"
+    emoji: "💻",
+    surfaceBg: "#200e16"
   },
   {
     lightBg: "bg-sky-50/60",
@@ -137,7 +141,8 @@ const courseThemes = [
     badge: "bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400",
     bar: "bg-sky-500",
     btn: "bg-sky-500 hover:bg-sky-600 text-white",
-    emoji: "🧠"
+    emoji: "🧠",
+    surfaceBg: "#0b1b2f"
   },
   {
     lightBg: "bg-amber-50/60",
@@ -146,7 +151,8 @@ const courseThemes = [
     badge: "bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400",
     bar: "bg-amber-500",
     btn: "bg-amber-500 hover:bg-amber-600 text-white",
-    emoji: "🎯"
+    emoji: "🎯",
+    surfaceBg: "#1a1711"
   }
 ];
 
@@ -209,10 +215,8 @@ function showView(screen) {
     renderWorkspace();
   } else {
     workspaceView.classList.add("hidden");
-    
     if (desktopSidebar) desktopSidebar.style.setProperty("display", "none", "important");
     if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
-
     authView.classList.remove("hidden");
   }
 }
@@ -231,7 +235,7 @@ window.handleGoogleSignIn = async function() {
     const res = await signInWithPopup(auth, provider);
     currentUser = res.user;
 
-    // 🔥 User Details + Profile Data Firestore me save karna
+    // 🔥 Sync User Profile to Firestore
     if (db) {
       await setDoc(doc(db, "users", currentUser.uid), {
         displayName: currentUser.displayName || "Scholar",
@@ -468,7 +472,9 @@ function renderCourses() {
     const theme = courseThemes[idx % courseThemes.length];
 
     const card = document.createElement("div");
-    card.className = `${theme.lightBg} ${theme.darkBg} border ${theme.border} rounded-3xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 shadow-sm transition hover:shadow-md`;
+    card.id = `courseCard_${course.id}`;
+    card.className = `course-card-morph ${theme.lightBg} ${theme.darkBg} border ${theme.border} rounded-3xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 shadow-sm cursor-pointer select-none`;
+    card.onclick = () => window.triggerCardMorph(card, course.id, theme);
 
     card.innerHTML = `
       <div class="space-y-2.5">
@@ -485,10 +491,10 @@ function renderCourses() {
         </div>
       </div>
 
-      <button onclick="openCourseDrawer('${course.id}')" class="w-full py-2 sm:py-2.5 ${theme.btn} rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer">
+      <div class="w-full py-2 sm:py-2.5 ${theme.btn} rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
         <i class="fa-solid fa-play text-[9px]"></i>
         <span>${completed > 0 ? 'Continue Learning' : 'Start Learning'}</span>
-      </button>
+      </div>
     `;
 
     container.appendChild(card);
@@ -531,49 +537,103 @@ function renderHistory() {
   });
 }
 
-// ================= 8. COURSE CHAPTERS DRAWER =================
-window.openCourseDrawer = function(courseId) {
+// ================= 8. FLIP SHARED-ELEMENT MORPH ENGINE =================
+window.triggerCardMorph = function(cardElement, courseId, theme) {
   const course = appState.courses.find(c => c.id === courseId);
   if (!course) return;
 
-  const completed = course.topics.filter(t => t.done).length;
-  document.getElementById("drawerCourseTitle").innerText = course.name;
-  document.getElementById("drawerCourseMeta").innerText = `${completed} of ${course.topics.length} Chapters Completed`;
+  morphActiveCard = cardElement;
+  morphCardRect = cardElement.getBoundingClientRect();
 
-  const list = document.getElementById("drawerChaptersList");
-  list.innerHTML = "";
+  const surface = document.getElementById("morphSurface");
+  const workspace = document.getElementById("mainWorkspaceView");
+  const completed = course.topics.filter(t => t.done).length;
+
+  document.getElementById("morphSurfaceTitle").innerText = course.name;
+  document.getElementById("morphSurfaceEmoji").innerText = theme.emoji;
+  document.getElementById("morphSurfaceMeta").innerText = `${completed} of ${course.topics.length} Chapters Completed`;
+  surface.style.backgroundColor = theme.surfaceBg;
+
+  // Render chapters list inside morph surface
+  const chaptersContainer = document.getElementById("morphSurfaceChapters");
+  chaptersContainer.innerHTML = "";
 
   course.topics.forEach((t, idx) => {
-    const row = document.createElement("div");
-    row.className = `flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border ${t.done ? 'border-slate-200/50 dark:border-slate-800/50 opacity-60' : 'border-slate-200 dark:border-slate-800'} text-xs`;
-    
-    row.innerHTML = `
+    const item = document.createElement("div");
+    item.className = `flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border ${t.done ? 'border-white/5 opacity-60' : 'border-white/10'} text-xs`;
+    item.innerHTML = `
       <div class="flex items-center gap-2.5">
-        <span class="font-mono text-sky-500 font-bold">${idx + 1}.</span>
-        <span class="${t.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200 font-medium'}">${t.name}</span>
+        <span class="font-mono text-sky-400 font-bold">${idx + 1}.</span>
+        <span class="${t.done ? 'line-through text-slate-400' : 'text-white font-medium'}">${t.name}</span>
         <span class="text-[10px] text-slate-400 font-mono">(${t.time}m)</span>
       </div>
       <div>
         ${t.done ? `
-          <span class="text-emerald-500 text-xs font-mono font-bold pr-1">Done ✓</span>
+          <span class="text-emerald-400 text-xs font-mono font-bold pr-1">Done ✓</span>
         ` : `
-          <button onclick="window.closeCourseDrawer(); startCourseFocus('${course.id}', '${t.id}', '${t.name.replace(/'/g, "\\'")}', ${t.time})" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-bold shadow-sm transition cursor-pointer">
-            Start
+          <button onclick="window.collapseMorphSurface(); window.startCourseFocus('${course.id}', '${t.id}', '${t.name.replace(/'/g, "\\'")}', ${t.time})" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-bold shadow-sm transition active:scale-95 cursor-pointer">
+            Start Focus
           </button>
         `}
       </div>
     `;
-    list.appendChild(row);
+    chaptersContainer.appendChild(item);
   });
 
-  document.getElementById("courseDrawerModal").classList.remove("hidden");
+  // STEP 1: Align surface flush with clicked card
+  surface.style.transition = "none";
+  surface.style.top = `${morphCardRect.top}px`;
+  surface.style.left = `${morphCardRect.left}px`;
+  surface.style.width = `${morphCardRect.width}px`;
+  surface.style.height = `${morphCardRect.height}px`;
+  surface.style.borderRadius = "24px";
+  surface.style.transform = "none";
+  surface.style.display = "flex";
+
+  morphActiveCard.style.opacity = "0";
+
+  // Force Layout Reflow
+  surface.offsetHeight;
+
+  // STEP 2: Animate smoothly to Full Screen + Push Back Main Workspace
+  surface.style.transition = "all 0.42s var(--fluid-spring)";
+  surface.style.top = "0px";
+  surface.style.left = "0px";
+  surface.style.width = "100vw";
+  surface.style.height = "100vh";
+  surface.style.borderRadius = "0px";
+
+  workspace.classList.add("workspace-pushed-back");
+  surface.classList.add("surface-active");
 };
 
-window.closeCourseDrawer = function() {
-  document.getElementById("courseDrawerModal").classList.add("hidden");
+window.collapseMorphSurface = function() {
+  if (!morphActiveCard || !morphCardRect) return;
+
+  const surface = document.getElementById("morphSurface");
+  const workspace = document.getElementById("mainWorkspaceView");
+
+  surface.classList.remove("surface-active");
+
+  // Animate Surface back into the card's original rectangle
+  surface.style.transition = "all 0.38s var(--fluid-spring)";
+  surface.style.top = `${morphCardRect.top}px`;
+  surface.style.left = `${morphCardRect.left}px`;
+  surface.style.width = `${morphCardRect.width}px`;
+  surface.style.height = `${morphCardRect.height}px`;
+  surface.style.borderRadius = "24px";
+
+  workspace.classList.remove("workspace-pushed-back");
+
+  setTimeout(() => {
+    surface.style.display = "none";
+    morphActiveCard.style.opacity = "1";
+    morphActiveCard = null;
+    morphCardRect = null;
+  }, 380);
 };
 
-// ================= 9. STRICT FOCUS ENGINE & SAFEGUARDS =================
+// ================= 9. STRICT FOCUS ENGINE =================
 window.startCourseFocus = function(courseId, topicId, title, minutes) {
   currentSession = {
     courseId,
@@ -650,7 +710,6 @@ function updateClockDisplay() {
   document.getElementById("focusClock").innerText = `${m}:${s}`;
 }
 
-// Tab Visibility Cheat Detector
 document.addEventListener("visibilitychange", () => {
   const focusModal = document.getElementById("fullScreenFocus");
   if (document.hidden && !focusModal.classList.contains("hidden") && !currentSession.isPaused) {
@@ -712,7 +771,6 @@ function exitFullScreen() {
   renderWorkspace();
 }
 
-// Screen Wake Lock
 async function requestScreenWakeLock() {
   try {
     if ('wakeLock' in navigator) {
@@ -735,13 +793,9 @@ function releaseScreenWakeLock() {
   }
 }
 
-// Web Audio Ambient Noise
 window.toggleSoundEngine = function() {
-  if (!isAudioPlaying) {
-    startAmbientNoise();
-  } else {
-    stopAmbientNoise();
-  }
+  if (!isAudioPlaying) startAmbientNoise();
+  else stopAmbientNoise();
 };
 
 function startAmbientNoise() {

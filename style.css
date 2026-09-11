@@ -17,7 +17,7 @@
   background: #080d1a;
 }
 
-/* Hide Scrollbars for Swipe */
+/* Hide Scrollbars */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -26,13 +26,13 @@
   scrollbar-width: none;
 }
 
-/* Card Glow Effect */
-.course-card-glow:hover {
-  border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
+/* Fluid Physics & Spring Constants */
+:root {
+  --fluid-spring: cubic-bezier(0.18, 0.95, 0.22, 1);
+  --smooth-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* HARD MOBILE LOCK: Sidebar can NEVER show on phones or tablets */
+/* Hard Mobile Lock for Desktop Sidebar */
 @media (max-width: 1023px) {
   #desktopSidebar {
     display: none !important;
@@ -41,4 +41,47 @@
     height: 0 !important;
     overflow: hidden !important;
   }
+}
+
+/* Tactile Card Motion */
+.course-card-morph {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  will-change: transform;
+}
+.course-card-morph:active {
+  transform: scale(0.96);
+}
+
+/* 3D Depth Pushback on Dashboard */
+#mainWorkspaceView {
+  transition: transform 0.42s var(--fluid-spring), filter 0.42s ease, opacity 0.42s ease;
+  transform-origin: center top;
+  will-change: transform, filter;
+}
+#mainWorkspaceView.workspace-pushed-back {
+  transform: scale(0.93) translateY(24px);
+  filter: blur(2.5px) brightness(0.65);
+  pointer-events: none;
+}
+
+/* Expanding Shared Morph Surface */
+#morphSurface {
+  position: fixed;
+  z-index: 9999;
+  overflow: hidden;
+  display: none;
+  transition: all 0.42s var(--fluid-spring);
+  will-change: transform, width, height, top, left, border-radius;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85);
+}
+
+/* Stagger Content Reveal Inside Expanded Card */
+.morph-stagger-content {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.3s ease 0.12s, transform 0.3s var(--fluid-spring) 0.12s;
+}
+#morphSurface.surface-active .morph-stagger-content {
+  opacity: 1;
+  transform: translateY(0);
 }
