@@ -20,7 +20,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 
   <script>
@@ -47,7 +47,7 @@
     }
   </script>
 </head>
-<body class="bg-slate-50 dark:bg-[#070b14] text-slate-800 dark:text-slate-100 min-h-screen font-sans antialiased selection:bg-sky-500 selection:text-white flex flex-col lg:flex-row overflow-x-hidden">
+<body class="bg-slate-50 dark:bg-[#070b14] text-slate-800 dark:text-slate-100 min-h-screen font-sans antialiased selection:bg-sky-500 selection:text-white flex flex-col lg:flex-row">
 
   <!-- Ambient Glows -->
   <div class="fixed top-0 left-0 lg:left-64 w-80 h-80 bg-sky-200/40 dark:bg-sky-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
@@ -56,6 +56,7 @@
   <!-- ================= VIEW 1: AUTH GATEWAY ================= -->
   <section id="authGatewayView" class="w-full min-h-screen flex flex-col items-center justify-center p-5 relative z-10">
     <div class="w-full max-w-sm my-auto py-4 space-y-6">
+      
       <div class="text-center space-y-3">
         <div class="relative w-36 h-36 mx-auto flex items-center justify-center">
           <div class="w-32 h-32 rounded-full bg-gradient-to-b from-sky-100 to-indigo-50 dark:from-slate-800 dark:to-slate-900 border border-sky-200/60 dark:border-slate-700 flex items-center justify-center shadow-inner">
@@ -150,13 +151,14 @@
           <i class="fa-solid fa-right-from-bracket text-xs"></i>
         </button>
       </div>
+
       <div class="text-center text-[10px] font-mono text-slate-400 pt-1">
         Made by <span class="font-bold text-slate-600 dark:text-slate-300">Utsav Kushwaha</span>
       </div>
     </div>
   </aside>
 
-  <!-- ================= VIEW 3: MAIN WORKSPACE (WITH 3D DEPTH + PARALLAX DRAG) ================= -->
+  <!-- ================= VIEW 3: MAIN WORKSPACE ================= -->
   <div id="mainWorkspaceView" class="hidden flex-1 w-full max-w-6xl mx-auto px-4 lg:px-10 pt-0 pb-28 lg:pb-12 relative z-10">
 
     <!-- Sticky Mobile App Bar -->
@@ -215,7 +217,7 @@
     <div class="w-full space-y-6">
       <!-- Hero Banner & Today's Focus -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-100 dark:from-[#0d1e38] dark:via-[#0c2642] dark:to-[#0f304d] border border-teal-100 dark:border-slate-700 p-4.5 p-4 sm:p-6 flex items-center justify-between shadow-sm">
+        <div class="lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-100 dark:from-[#0d1e38] dark:via-[#0c2642] dark:to-[#0f304d] border border-teal-100 dark:border-slate-700 p-4 sm:p-6 flex items-center justify-between shadow-sm">
           <div class="space-y-1 relative z-10">
             <h2 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               <span id="heroGreetingText">Good Evening</span>, <span id="dashUserName" class="text-teal-600 dark:text-sky-400">Scholar</span> 👋
@@ -310,7 +312,7 @@
         <div class="flex items-center justify-between px-1">
           <div>
             <h3 class="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">Your Courses</h3>
-            <p class="text-[10px] text-slate-400">Tap card to trigger fluid expansion animation</p>
+            <p class="text-[10px] text-slate-400">Tap to expand course chapters and start focus</p>
           </div>
           <button onclick="openAddCourseModal()" class="text-xs font-bold text-sky-500 hover:text-sky-600 flex items-center gap-1 cursor-pointer">
             <span>+ Add Course</span>
@@ -334,26 +336,23 @@
 
   </div>
 
-  <!-- ================= 4. FLIP SHARED MORPH EXPANSION SURFACE ================= -->
-  <div id="morphSurface" class="border border-slate-700/60 flex flex-col justify-between p-6">
-    <div class="flex items-center justify-between border-b border-white/10 pb-4">
-      <div class="flex items-center gap-3">
-        <span id="morphSurfaceEmoji" class="text-3xl select-none">🧠</span>
+  <!-- ================= COURSE CHAPTERS MODAL DRAWER ================= -->
+  <div id="courseDrawerModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white dark:bg-app-cardDark border-t sm:border border-slate-200 dark:border-app-borderDark rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
         <div>
-          <span id="morphSurfaceMeta" class="text-[9px] font-mono uppercase tracking-widest text-slate-400">0 of 0 Completed</span>
-          <h2 id="morphSurfaceTitle" class="text-base font-black text-white leading-tight">Course Title</h2>
+          <h3 id="drawerCourseTitle" class="text-base font-extrabold text-slate-900 dark:text-white">Course Chapters</h3>
+          <span id="drawerCourseMeta" class="text-xs font-mono text-slate-400">0 of 0 Completed</span>
         </div>
+        <button onclick="closeCourseDrawer()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
       </div>
-      <button onclick="collapseMorphSurface()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 text-white flex items-center justify-center transition cursor-pointer">
-        <i class="fa-solid fa-xmark text-sm"></i>
-      </button>
-    </div>
 
-    <div id="morphSurfaceChapters" class="morph-stagger-content my-auto space-y-2.5 py-6 overflow-y-auto max-h-[60vh] pr-1"></div>
-
-    <div class="morph-stagger-content pt-3 border-t border-white/10">
-      <button onclick="collapseMorphSurface()" class="w-full py-3.5 bg-white/10 hover:bg-white/15 active:scale-95 text-slate-200 font-bold text-xs rounded-2xl border border-white/10 transition cursor-pointer">
-        ← Back to Workspace
+      <div id="drawerChaptersList" class="space-y-2 overflow-y-auto flex-1 pr-1"></div>
+      
+      <button onclick="closeCourseDrawer()" class="w-full py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold cursor-pointer">
+        Close
       </button>
     </div>
   </div>

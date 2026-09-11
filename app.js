@@ -109,10 +109,6 @@ let audioCtx = null;
 let noiseSource = null;
 let isAudioPlaying = false;
 
-// Shared Element Morph References
-let morphActiveCard = null;
-let morphCardRect = null;
-
 const courseThemes = [
   {
     lightBg: "bg-emerald-50/60",
@@ -121,8 +117,7 @@ const courseThemes = [
     badge: "bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
     bar: "bg-emerald-500",
     btn: "bg-emerald-600 hover:bg-emerald-500 text-white",
-    emoji: "📝",
-    surfaceBg: "#091b15"
+    emoji: "📝"
   },
   {
     lightBg: "bg-pink-50/60",
@@ -131,8 +126,7 @@ const courseThemes = [
     badge: "bg-pink-100 dark:bg-pink-950 text-pink-600 dark:text-pink-400",
     bar: "bg-rose-500",
     btn: "bg-rose-500 hover:bg-rose-600 text-white",
-    emoji: "💻",
-    surfaceBg: "#200e16"
+    emoji: "💻"
   },
   {
     lightBg: "bg-sky-50/60",
@@ -141,8 +135,7 @@ const courseThemes = [
     badge: "bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400",
     bar: "bg-sky-500",
     btn: "bg-sky-500 hover:bg-sky-600 text-white",
-    emoji: "🧠",
-    surfaceBg: "#0b1b2f"
+    emoji: "🧠"
   },
   {
     lightBg: "bg-amber-50/60",
@@ -151,8 +144,7 @@ const courseThemes = [
     badge: "bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400",
     bar: "bg-amber-500",
     btn: "bg-amber-500 hover:bg-amber-600 text-white",
-    emoji: "🎯",
-    surfaceBg: "#1a1711"
+    emoji: "🎯"
   }
 ];
 
@@ -471,11 +463,7 @@ function renderCourses() {
     const theme = courseThemes[idx % courseThemes.length];
 
     const card = document.createElement("div");
-    card.id = `courseCard_${course.id}`;
-    card.className = `course-card-morph ${theme.lightBg} ${theme.darkBg} border ${theme.border} rounded-3xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 shadow-sm cursor-pointer select-none`;
-    
-    // Wave Aura + FLIP Morph on Tap
-    card.onclick = (e) => window.triggerCardMorph(card, course.id, theme, e);
+    card.className = `${theme.lightBg} ${theme.darkBg} border ${theme.border} rounded-3xl p-4 sm:p-5 flex flex-col justify-between space-y-3.5 shadow-sm transition hover:shadow-md`;
 
     card.innerHTML = `
       <div class="space-y-2.5">
@@ -492,10 +480,10 @@ function renderCourses() {
         </div>
       </div>
 
-      <div class="w-full py-2 sm:py-2.5 ${theme.btn} rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
+      <button onclick="openCourseDrawer('${course.id}')" class="w-full py-2 sm:py-2.5 ${theme.btn} rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer">
         <i class="fa-solid fa-play text-[9px]"></i>
         <span>${completed > 0 ? 'Continue Learning' : 'Start Learning'}</span>
-      </div>
+      </button>
     `;
 
     container.appendChild(card);
@@ -538,156 +526,49 @@ function renderHistory() {
   });
 }
 
-// ================= 8. ADVANCED FLIP MORPH + AURA RECOIL =================
-window.triggerCardMorph = function(cardElement, courseId, theme, event) {
+// ================= 8. COURSE CHAPTERS DRAWER =================
+window.openCourseDrawer = function(courseId) {
   const course = appState.courses.find(c => c.id === courseId);
   if (!course) return;
 
-  // 1. Wave Pressure Glow at tap location
-  if (event) {
-    const rect = cardElement.getBoundingClientRect();
-    const aura = document.createElement("div");
-    aura.className = "pressure-aura";
-    aura.style.left = `${event.clientX - rect.left}px`;
-    aura.style.top = `${event.clientY - rect.top}px`;
-    cardElement.appendChild(aura);
-    setTimeout(() => aura.remove(), 500);
-  }
-
-  morphActiveCard = cardElement;
-  morphCardRect = cardElement.getBoundingClientRect();
-
-  const surface = document.getElementById("morphSurface");
-  const workspace = document.getElementById("mainWorkspaceView");
   const completed = course.topics.filter(t => t.done).length;
+  document.getElementById("drawerCourseTitle").innerText = course.name;
+  document.getElementById("drawerCourseMeta").innerText = `${completed} of ${course.topics.length} Chapters Completed`;
 
-  document.getElementById("morphSurfaceTitle").innerText = course.name;
-  document.getElementById("morphSurfaceEmoji").innerText = theme.emoji;
-  document.getElementById("morphSurfaceMeta").innerText = `${completed} of ${course.topics.length} Chapters Completed`;
-  surface.style.backgroundColor = theme.surfaceBg;
-
-  // Render chapters list inside morph surface
-  const chaptersContainer = document.getElementById("morphSurfaceChapters");
-  chaptersContainer.innerHTML = "";
+  const list = document.getElementById("drawerChaptersList");
+  list.innerHTML = "";
 
   course.topics.forEach((t, idx) => {
-    const item = document.createElement("div");
-    item.className = `flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border ${t.done ? 'border-white/5 opacity-60' : 'border-white/10'} text-xs`;
-    item.innerHTML = `
+    const row = document.createElement("div");
+    row.className = `flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border ${t.done ? 'border-slate-200/50 dark:border-slate-800/50 opacity-60' : 'border-slate-200 dark:border-slate-800'} text-xs`;
+    
+    row.innerHTML = `
       <div class="flex items-center gap-2.5">
-        <span class="font-mono text-sky-400 font-bold">${idx + 1}.</span>
-        <span class="${t.done ? 'line-through text-slate-400' : 'text-white font-medium'}">${t.name}</span>
+        <span class="font-mono text-sky-500 font-bold">${idx + 1}.</span>
+        <span class="${t.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200 font-medium'}">${t.name}</span>
         <span class="text-[10px] text-slate-400 font-mono">(${t.time}m)</span>
       </div>
       <div>
         ${t.done ? `
-          <span class="text-emerald-400 text-xs font-mono font-bold pr-1">Done ✓</span>
+          <span class="text-emerald-500 text-xs font-mono font-bold pr-1">Done ✓</span>
         ` : `
-          <button onclick="window.collapseMorphSurface(); window.startCourseFocus('${course.id}', '${t.id}', '${t.name.replace(/'/g, "\\'")}', ${t.time})" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-bold shadow-sm transition active:scale-95 cursor-pointer">
-            Start Focus
+          <button onclick="window.closeCourseDrawer(); startCourseFocus('${course.id}', '${t.id}', '${t.name.replace(/'/g, "\\'")}', ${t.time})" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-bold shadow-sm transition cursor-pointer">
+            Start
           </button>
         `}
       </div>
     `;
-    chaptersContainer.appendChild(item);
+    list.appendChild(row);
   });
 
-  // STEP 1: Align surface flush with clicked card
-  surface.style.transition = "none";
-  surface.style.top = `${morphCardRect.top}px`;
-  surface.style.left = `${morphCardRect.left}px`;
-  surface.style.width = `${morphCardRect.width}px`;
-  surface.style.height = `${morphCardRect.height}px`;
-  surface.style.borderRadius = "24px";
-  surface.style.transform = "none";
-  surface.style.display = "flex";
-
-  morphActiveCard.style.opacity = "0";
-
-  // Force Layout Reflow
-  surface.offsetHeight;
-
-  // STEP 2: Animate smoothly to Full Screen + 3D Depth Layering
-  surface.style.transition = "all 0.42s cubic-bezier(0.19, 1, 0.22, 1)";
-  surface.style.top = "0px";
-  surface.style.left = "0px";
-  surface.style.width = "100vw";
-  surface.style.height = "100vh";
-  surface.style.borderRadius = "0px";
-
-  // Parallax Tilt & Recoil Depth on Background Workspace
-  workspace.classList.add("workspace-pushed-back");
-  surface.classList.add("surface-active");
+  document.getElementById("courseDrawerModal").classList.remove("hidden");
 };
 
-window.collapseMorphSurface = function() {
-  if (!morphActiveCard || !morphCardRect) return;
-
-  const surface = document.getElementById("morphSurface");
-  const workspace = document.getElementById("mainWorkspaceView");
-
-  surface.classList.remove("surface-active");
-
-  // Animate Surface back into the card's original rectangle
-  surface.style.transition = "all 0.38s cubic-bezier(0.19, 1, 0.22, 1)";
-  surface.style.top = `${morphCardRect.top}px`;
-  surface.style.left = `${morphCardRect.left}px`;
-  surface.style.width = `${morphCardRect.width}px`;
-  surface.style.height = `${morphCardRect.height}px`;
-  surface.style.borderRadius = "24px";
-
-  workspace.classList.remove("workspace-pushed-back");
-
-  setTimeout(() => {
-    surface.style.display = "none";
-    morphActiveCard.style.opacity = "1";
-    morphActiveCard = null;
-    morphCardRect = null;
-  }, 380);
+window.closeCourseDrawer = function() {
+  document.getElementById("courseDrawerModal").classList.add("hidden");
 };
 
-// ================= 9. RUBBER-BAND ELASTIC OVERSCROLL ENGINE =================
-// Pointer tracking for smooth rubber-band bounce on dragging
-let touchStartY = 0;
-let isDraggingVertical = false;
-
-window.addEventListener("pointerdown", (e) => {
-  const workspace = document.getElementById("mainWorkspaceView");
-  if (!workspace || workspace.classList.contains("hidden") || workspace.classList.contains("workspace-pushed-back")) return;
-
-  if (window.scrollY === 0) {
-    touchStartY = e.clientY;
-    isDraggingVertical = true;
-  }
-});
-
-window.addEventListener("pointermove", (e) => {
-  if (!isDraggingVertical) return;
-  const diffY = e.clientY - touchStartY;
-  const workspace = document.getElementById("mainWorkspaceView");
-
-  // Elastic pull-down at the top
-  if (diffY > 0 && window.scrollY === 0) {
-    const rubberBandY = Math.pow(diffY, 0.78); // Physics damping curve
-    workspace.style.transition = "none";
-    workspace.style.transform = `translateY(${rubberBandY}px) scale(${1 + rubberBandY * 0.0003})`;
-  }
-});
-
-function releaseRubberBand() {
-  if (!isDraggingVertical) return;
-  isDraggingVertical = false;
-  const workspace = document.getElementById("mainWorkspaceView");
-  if (workspace && !workspace.classList.contains("workspace-pushed-back")) {
-    workspace.style.transition = "transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)";
-    workspace.style.transform = "none";
-  }
-}
-
-window.addEventListener("pointerup", releaseRubberBand);
-window.addEventListener("pointercancel", releaseRubberBand);
-
-// ================= 10. STRICT FOCUS ENGINE =================
+// ================= 9. STRICT FOCUS ENGINE =================
 window.startCourseFocus = function(courseId, topicId, title, minutes) {
   currentSession = {
     courseId,
@@ -917,7 +798,7 @@ function logSessionComplete() {
   persist();
 }
 
-// ================= 11. MODAL ACTIONS =================
+// ================= 10. MODAL ACTIONS =================
 window.openAddCourseModal = function() {
   tempTopics = [];
   document.getElementById("modalCourseTitle").value = "";
