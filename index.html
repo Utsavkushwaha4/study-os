@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>StudyOS — AI Engineer Workspace</title>
 
-  <!-- PWA & Mobile Touch Icons -->
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" sizes="192x192" href="icon.png" />
   <link rel="apple-touch-icon" href="icon.png" />
@@ -13,10 +12,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <!-- External Custom CSS -->
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -49,14 +45,12 @@
 </head>
 <body class="bg-slate-50 dark:bg-[#070b14] text-slate-800 dark:text-slate-100 min-h-screen font-sans antialiased selection:bg-sky-500 selection:text-white flex flex-col lg:flex-row">
 
-  <!-- Ambient Glows -->
   <div class="fixed top-0 left-0 lg:left-64 w-80 h-80 bg-sky-200/40 dark:bg-sky-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
   <div class="fixed bottom-0 right-0 w-96 h-96 bg-amber-200/30 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-  <!-- ================= VIEW 1: AUTH GATEWAY ================= -->
+  <!-- AUTH GATEWAY -->
   <section id="authGatewayView" class="w-full min-h-screen flex flex-col items-center justify-center p-5 relative z-10">
     <div class="w-full max-w-sm my-auto py-4 space-y-6">
-      
       <div class="text-center space-y-3">
         <div class="relative w-36 h-36 mx-auto flex items-center justify-center">
           <div class="w-32 h-32 rounded-full bg-gradient-to-b from-sky-100 to-indigo-50 dark:from-slate-800 dark:to-slate-900 border border-sky-200/60 dark:border-slate-700 flex items-center justify-center shadow-inner">
@@ -90,20 +84,11 @@
           <i class="fa-regular fa-user text-xs"></i>
           <span>Continue as Guest (Local Only)</span>
         </button>
-
-        <div class="pt-2 text-center text-[10px] text-slate-400 font-mono flex items-center justify-center gap-1.5">
-          <i class="fa-solid fa-cloud text-sky-400"></i>
-          <span>Cross-device real-time sync enabled</span>
-        </div>
       </div>
-    </div>
-
-    <div class="w-full text-center text-xs font-mono text-slate-400 py-3 select-none">
-      Made with <span class="text-amber-500">⚡</span> by <span class="font-bold text-slate-700 dark:text-slate-200">Utsav Kushwaha</span>
     </div>
   </section>
 
-  <!-- ================= VIEW 2: DESKTOP LEFT SIDEBAR ================= -->
+  <!-- DESKTOP SIDEBAR -->
   <aside id="desktopSidebar" class="hidden w-64 border-r border-slate-200 dark:border-app-borderDark bg-white/80 dark:bg-[#0d1527]/80 backdrop-blur-xl p-5 flex-col justify-between h-screen sticky top-0 z-30 flex-shrink-0">
     <div class="space-y-6">
       <div class="flex items-center gap-3 px-1">
@@ -151,17 +136,13 @@
           <i class="fa-solid fa-right-from-bracket text-xs"></i>
         </button>
       </div>
-
-      <div class="text-center text-[10px] font-mono text-slate-400 pt-1">
-        Made by <span class="font-bold text-slate-600 dark:text-slate-300">Utsav Kushwaha</span>
-      </div>
     </div>
   </aside>
 
-  <!-- ================= VIEW 3: MAIN WORKSPACE ================= -->
+  <!-- MAIN WORKSPACE -->
   <div id="mainWorkspaceView" class="hidden flex-1 w-full max-w-6xl mx-auto px-4 lg:px-10 pt-0 pb-32 lg:pb-12 relative z-10">
 
-    <!-- Sticky Mobile App Bar -->
+    <!-- Sticky Mobile App Bar (Fixed: Online removed, Functional Sync Added) -->
     <header class="sticky top-0 z-30 bg-slate-50/90 dark:bg-[#070b14]/90 backdrop-blur-md pt-3 pb-2.5 mb-3 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-800/50 lg:hidden">
       <div class="flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-2xl bg-[#0b1329] border border-slate-800 flex items-center justify-center text-white shadow-md shadow-sky-500/20 p-2">
@@ -178,17 +159,19 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Online</span>
-        </span>
+        <!-- Quick Sync Action Button -->
+        <button onclick="triggerQuickSync()" id="quickSyncBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-200/70 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-xs font-semibold cursor-pointer active:scale-95 transition" title="Refresh & Sync Data">
+          <i class="fa-solid fa-rotate text-[11px] text-sky-500"></i>
+          <span class="text-[11px]">Sync</span>
+        </button>
+
         <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-amber-400 flex items-center justify-center text-xs shadow-sm cursor-pointer">
           <i id="themeIconMobile" class="fa-solid fa-moon"></i>
         </button>
       </div>
     </header>
 
-    <!-- Sticky Desktop Header -->
+    <!-- Desktop Header -->
     <header class="hidden lg:flex sticky top-0 z-30 bg-slate-50/90 dark:bg-[#070b14]/90 backdrop-blur-md pt-5 pb-4 mb-6 items-center justify-between border-b border-slate-200 dark:border-app-borderDark w-full">
       <div class="space-y-0.5">
         <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">AI Engineer Workspace</h2>
@@ -196,7 +179,7 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <button onclick="toggleTheme()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark text-xs font-semibold flex items-center gap-2 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition cursor-pointer">
+        <button onclick="toggleTheme()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark text-xs font-semibold flex items-center gap-2 shadow-sm transition cursor-pointer">
           <i id="themeIconDesktop" class="fa-solid fa-moon text-slate-600 dark:text-amber-400"></i>
           <span class="text-[11px] text-slate-600 dark:text-slate-300">Theme</span>
         </button>
@@ -204,7 +187,7 @@
           <i class="fa-solid fa-shield-halved text-xs"></i>
           <span>Strict Focus</span>
         </button>
-        <button onclick="openAddCourseModal()" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-emerald-600/20 transition cursor-pointer">
+        <button onclick="openAddCourseModal()" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 shadow-md transition cursor-pointer">
           <i class="fa-solid fa-plus text-xs"></i>
           <span>New Course</span>
         </button>
@@ -212,7 +195,6 @@
     </header>
 
     <div class="w-full space-y-6">
-      <!-- Hero Banner & Today's Focus -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div class="lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-100 dark:from-[#0d1e38] dark:via-[#0c2642] dark:to-[#0f304d] border border-teal-100 dark:border-slate-700 p-4 sm:p-6 flex items-center justify-between shadow-sm">
           <div class="space-y-1 relative z-10">
@@ -220,15 +202,12 @@
               <span id="heroGreetingText">Good Evening</span>, <span id="dashUserName" class="text-teal-600 dark:text-sky-400">Scholar</span> 👋
             </h2>
             <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 max-w-md font-medium leading-relaxed">
-              Keep going! Your future AI Engineer self will thank you. Every focused session counts.
+              Keep going! Your future AI Engineer self will thank you.
             </p>
           </div>
 
           <div class="relative w-20 sm:w-28 h-16 sm:h-24 flex items-center justify-center flex-shrink-0 select-none">
             <span class="text-5xl sm:text-6xl">👨‍💻</span>
-            <div class="absolute -top-1 -right-1 bg-white/90 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded-lg shadow-sm text-[8px] sm:text-[9px] font-bold text-teal-600 dark:text-teal-400">
-              Better Daily ✨
-            </div>
           </div>
         </div>
 
@@ -244,10 +223,6 @@
           </div>
           <div class="w-7 h-7 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-xs lg:hidden">
             <i class="fa-solid fa-play text-[9px] text-amber-500"></i>
-          </div>
-          <div class="hidden lg:flex w-full pt-2 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-xs font-bold text-amber-500">
-            <span>Start Guarded Session</span>
-            <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
           </div>
         </div>
       </section>
@@ -294,10 +269,7 @@
             <div class="w-6 h-6 rounded-lg bg-sky-50 dark:bg-sky-950 flex items-center justify-center text-sky-500 text-xs">
               <i class="fa-regular fa-calendar"></i>
             </div>
-            <div>
-              <h4 class="text-xs font-bold text-slate-800 dark:text-white leading-none">Weekly Calendar</h4>
-              <span class="text-[9px] text-slate-400">Keep up your daily consistency!</span>
-            </div>
+            <h4 class="text-xs font-bold text-slate-800 dark:text-white leading-none">Weekly Calendar</h4>
           </div>
           <span id="calendarCurrentMonth" class="text-[10px] font-mono font-bold text-sky-500">This Week</span>
         </div>
@@ -309,7 +281,7 @@
         <div class="flex items-center justify-between px-1">
           <div>
             <h3 class="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">Your Courses</h3>
-            <p class="text-[10px] text-slate-400">Tap to view chapters and start learning</p>
+            <p class="text-[10px] text-slate-400">Tap to start chapters</p>
           </div>
           <button onclick="openAddCourseModal()" class="text-xs font-bold text-sky-500 hover:text-sky-600 flex items-center gap-1 cursor-pointer">
             <span>+ Add Course</span>
@@ -322,7 +294,7 @@
       <section id="historySection" class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-2xl p-4 shadow-sm space-y-3">
         <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <h4 class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Today's Study History</h4>
+            <h4 class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Today's History</h4>
             <p class="text-[10px] text-slate-400">Completed sessions logged today</p>
           </div>
           <span id="totalStudyTimeToday" class="text-xs font-mono font-bold text-emerald-500">0 Mins</span>
@@ -333,7 +305,7 @@
 
   </div>
 
-  <!-- ================= COURSE CHAPTERS MODAL DRAWER ================= -->
+  <!-- COURSE CHAPTERS DRAWER -->
   <div id="courseDrawerModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white dark:bg-app-cardDark border-t sm:border border-slate-200 dark:border-app-borderDark rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
       <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -354,11 +326,11 @@
     </div>
   </div>
 
-  <!-- ================= FLOATING LIQUID GLASS TASKBAR (MOBILE ONLY) ================= -->
+  <!-- LIQUID GLASS TASKBAR (HIGH CONTRAST LIGHT/DARK) -->
   <div id="bottomTaskbarWrapper" class="hidden fixed bottom-5 left-0 right-0 z-40 justify-center px-4 pointer-events-none lg:hidden">
     <nav id="bottomTaskbar" class="pointer-events-auto liquid-glass-dock w-full max-w-[390px] h-[64px] px-2.5 rounded-[32px] flex items-center justify-between">
       
-      <!-- 1. Home (Today) -->
+      <!-- 1. Home -->
       <button onclick="switchDockTab(this, 'home')" class="nav-tab-item tab-active cursor-pointer">
         <i class="fa-solid fa-house text-base"></i>
         <span class="dock-tab-title text-[10px] font-bold tracking-tight mt-0.5">Today</span>
@@ -370,7 +342,7 @@
         <span class="dock-tab-title text-[10px] font-semibold tracking-tight mt-0.5">Courses</span>
       </button>
 
-      <!-- 3. Focus (Clean Balanced Layout) -->
+      <!-- 3. Focus -->
       <button onclick="switchDockTab(this, 'focus')" class="nav-tab-item cursor-pointer" title="Strict Focus">
         <i class="fa-solid fa-shield-halved text-base"></i>
         <span class="dock-tab-title text-[10px] font-semibold tracking-tight mt-0.5">Focus</span>
@@ -382,10 +354,9 @@
         <span class="dock-tab-title text-[10px] font-semibold tracking-tight mt-0.5">History</span>
       </button>
 
-      <!-- Divider -->
-      <div class="w-[1px] h-5 bg-white/20 mx-0.5"></div>
+      <div class="w-[1px] h-5 bg-slate-400/30 dark:bg-white/20 mx-0.5"></div>
 
-      <!-- 5. Exit / Logout -->
+      <!-- 5. Exit -->
       <button onclick="handleSignOut()" class="nav-tab-item nav-exit-btn cursor-pointer" title="Exit / Logout">
         <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
         <span class="text-[10px] font-semibold tracking-tight mt-0.5">Exit</span>
@@ -394,7 +365,123 @@
     </nav>
   </div>
 
-  <!-- Modals -->
+  <!-- FOCUS FULLSCREEN WITH MOVING FULL-BODY PANDA (NO AUDIO OFF BUTTON) -->
+  <div id="fullScreenFocus" class="fixed inset-0 bg-[#070b14] z-50 flex flex-col items-center justify-between p-5 sm:p-8 hidden select-none overflow-hidden">
+    
+    <!-- Top Bar: Status + Real World Clock (Audio Button Removed) -->
+    <div class="w-full max-w-md flex items-center justify-between z-10">
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Guarded Focus</span>
+        </span>
+      </div>
+
+      <!-- Real World Live Clock -->
+      <span id="focusRealWorldTime" class="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-slate-900 text-sky-400 border border-slate-800 flex items-center gap-1.5 shadow-sm">
+        <i class="fa-regular fa-clock text-[10px]"></i>
+        <span id="liveClockText">--:-- --</span>
+      </span>
+    </div>
+
+    <!-- Distraction Banner -->
+    <div id="cheatWarningBanner" class="w-full max-w-md bg-rose-950/90 border border-rose-600 rounded-2xl p-3 text-center space-y-1 shadow-2xl transition-all hidden z-10">
+      <div class="flex items-center justify-center gap-2 text-rose-400 font-bold text-xs">
+        <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
+        <span>DISTRACTION DETECTED! SESSION PAUSED</span>
+      </div>
+      <p class="text-[11px] text-rose-200">Aapne tab switch kiya tha. Padhai par dhyan de!</p>
+    </div>
+
+    <!-- Center Stage: Full Dynamic Animated Panda -->
+    <div id="pandaContainer" class="text-center space-y-3 my-auto relative z-10 flex flex-col items-center">
+      
+      <!-- Full Body Animated Patrol Panda -->
+      <div class="interactive-panda">
+        <svg viewBox="0 0 140 130" class="w-full h-full drop-shadow-2xl">
+          <!-- Ears -->
+          <g class="panda-ears">
+            <circle cx="36" cy="28" r="15" fill="#0f172a" />
+            <circle cx="104" cy="28" r="15" fill="#0f172a" />
+          </g>
+
+          <!-- Legs & Feet -->
+          <g class="panda-feet">
+            <ellipse cx="40" cy="116" rx="14" ry="9" fill="#0f172a" />
+            <ellipse cx="100" cy="116" rx="14" ry="9" fill="#0f172a" />
+          </g>
+
+          <!-- Main Torso Body -->
+          <ellipse cx="70" cy="88" rx="42" ry="34" fill="#0f172a" />
+          <ellipse cx="70" cy="85" rx="30" ry="24" fill="#ffffff" />
+
+          <!-- Big Cute Head -->
+          <ellipse cx="70" cy="50" rx="44" ry="36" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" />
+
+          <!-- Eye Patches -->
+          <ellipse cx="52" cy="48" rx="11" ry="14" fill="#0f172a" transform="rotate(-15 52 48)" />
+          <ellipse cx="88" cy="48" rx="11" ry="14" fill="#0f172a" transform="rotate(15 88 48)" />
+          
+          <!-- Pupils -->
+          <circle cx="54" cy="49" r="4" fill="#ffffff" />
+          <circle cx="86" cy="49" r="4" fill="#ffffff" />
+          <circle cx="55" cy="50" r="1.5" fill="#0f172a" />
+          <circle cx="85" cy="50" r="1.5" fill="#0f172a" />
+
+          <!-- Nose & Cheeks -->
+          <ellipse cx="70" cy="58" rx="5" ry="3.5" fill="#0f172a" />
+          <path d="M 67 63 Q 70 66 73 63" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round" />
+          <ellipse cx="40" cy="56" rx="5" ry="3" fill="#f43f5e" opacity="0.3" />
+          <ellipse cx="100" cy="56" rx="5" ry="3" fill="#f43f5e" opacity="0.3" />
+
+          <!-- Desk Laptop -->
+          <rect x="42" y="86" width="56" height="30" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+          <line x1="48" y1="92" x2="72" y2="92" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" />
+          <line x1="48" y1="97" x2="84" y2="97" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" />
+          <line x1="48" y1="102" x2="68" y2="102" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" />
+
+          <!-- Animated Arms Typing on Keyboard -->
+          <g class="panda-typing-arms">
+            <ellipse cx="46" cy="98" rx="8" ry="6" fill="#0f172a" />
+            <ellipse cx="94" cy="98" rx="8" ry="6" fill="#0f172a" />
+          </g>
+        </svg>
+      </div>
+
+      <span id="focusCategoryBadge" class="text-xs font-mono uppercase tracking-widest text-sky-400 bg-sky-950/60 border border-sky-800/80 px-3 py-0.5 rounded-full">
+        Course Focus
+      </span>
+
+      <h2 id="focusMainTitle" class="text-xl sm:text-2xl font-black text-white tracking-wide max-w-xs truncate">
+        Topic Name
+      </h2>
+
+      <!-- Big Countdown Clock -->
+      <div id="focusClock" class="text-7xl sm:text-8xl font-black font-mono tracking-tight text-white drop-shadow-2xl">
+        25:00
+      </div>
+
+      <p id="focusSubState" class="text-xs font-mono text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 justify-center">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+        <span>Deep Focus In Progress</span>
+      </p>
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="w-full max-w-md flex items-center gap-3 z-10">
+      <button id="focusPauseBtn" onclick="toggleFocusPause()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-mono font-bold text-xs rounded-xl cursor-pointer">
+        Pause
+      </button>
+      <button onclick="endFocusEarly()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 cursor-pointer">
+        Complete ✓
+      </button>
+      <button onclick="cancelFocusSession()" class="py-3 px-4 bg-slate-900 hover:bg-rose-950 text-slate-400 hover:text-rose-400 font-mono text-xs rounded-xl cursor-pointer">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- MODALS -->
   <div id="selfStudyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
       <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -449,108 +536,6 @@
         <button onclick="closeAddCourseModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-semibold cursor-pointer">Cancel</button>
         <button onclick="saveNewCourse()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold cursor-pointer">Save Course</button>
       </div>
-    </div>
-  </div>
-
-  <!-- ================= VIEW 4: STRICT FOCUS FULLSCREEN WITH PANDA & REAL-TIME CLOCK ================= -->
-  <div id="fullScreenFocus" class="fixed inset-0 bg-[#070b14] z-50 flex flex-col items-center justify-between p-5 sm:p-8 hidden select-none overflow-hidden">
-    
-    <!-- Top Bar: Guards + Real World Time Clock -->
-    <div class="w-full max-w-md flex items-center justify-between z-10">
-      <div class="flex items-center gap-2">
-        <span class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Guarded</span>
-        </span>
-        
-        <!-- 🔥 REAL-WORLD LIVE CLOCK (IDEA 1) 🔥 -->
-        <span id="focusRealWorldTime" class="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full bg-slate-900 text-sky-400 border border-slate-800 flex items-center gap-1.5 shadow-sm">
-          <i class="fa-regular fa-clock text-[10px]"></i>
-          <span id="liveClockText">--:-- --</span>
-        </span>
-      </div>
-
-      <button id="soundToggleBtn" onclick="toggleSoundEngine()" class="px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-xs font-mono flex items-center gap-1.5 hover:text-white cursor-pointer">
-        <i id="soundIcon" class="fa-solid fa-volume-xmark"></i>
-        <span id="soundLabel">Audio Off</span>
-      </button>
-    </div>
-
-    <!-- Distraction Banner -->
-    <div id="cheatWarningBanner" class="w-full max-w-md bg-rose-950/90 border border-rose-600 rounded-2xl p-3 text-center space-y-1 shadow-2xl transition-all hidden z-10">
-      <div class="flex items-center justify-center gap-2 text-rose-400 font-bold text-xs">
-        <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
-        <span>DISTRACTION DETECTED! SESSION PAUSED</span>
-      </div>
-      <p class="text-[11px] text-rose-200">Aapne tab switch kiya tha. Padhai par focus karein!</p>
-    </div>
-
-    <!-- Center Stage: Timer + 🔥 ANIMATED STUDY PANDA (IDEA 2) 🔥 -->
-    <div class="text-center space-y-3 my-auto relative z-10 flex flex-col items-center">
-      
-      <!-- Animated Study Panda Mascot -->
-      <div class="panda-box w-28 h-24 relative flex items-center justify-center">
-        <svg viewBox="0 0 120 100" class="w-full h-full drop-shadow-xl">
-          <!-- Panda Ears -->
-          <circle cx="28" cy="24" r="14" fill="#0f172a" class="panda-ear-left" />
-          <circle cx="92" cy="24" r="14" fill="#0f172a" />
-          <!-- Head -->
-          <ellipse cx="60" cy="46" rx="42" ry="34" fill="#ffffff" />
-          <!-- Eye Patches -->
-          <ellipse cx="44" cy="44" rx="10" ry="13" fill="#0f172a" transform="rotate(-15 44 44)" />
-          <ellipse cx="76" cy="44" rx="10" ry="13" fill="#0f172a" transform="rotate(15 76 44)" />
-          <!-- Eye Pupils (Looking at screen) -->
-          <circle cx="46" cy="46" r="3.5" fill="#ffffff" />
-          <circle cx="74" cy="46" r="3.5" fill="#ffffff" />
-          <!-- Nose & Mouth -->
-          <ellipse cx="60" cy="56" rx="5" ry="3.5" fill="#0f172a" />
-          <path d="M 57 60 Q 60 63 63 60" stroke="#0f172a" stroke-width="1.8" fill="none" />
-          <!-- Body & Arms -->
-          <path d="M 30 78 Q 60 68 90 78 L 95 100 L 25 100 Z" fill="#0f172a" />
-          <!-- Laptop Screen -->
-          <rect x="36" y="68" width="48" height="28" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
-          <!-- Glowing Code on Screen -->
-          <line x1="42" y1="74" x2="65" y2="74" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" />
-          <line x1="42" y1="79" x2="72" y2="79" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" />
-          <line x1="42" y1="84" x2="58" y2="84" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" />
-          <!-- Paws / Hands Typing -->
-          <g class="panda-hands">
-            <ellipse cx="40" cy="85" rx="6" ry="5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5" />
-            <ellipse cx="80" cy="85" rx="6" ry="5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5" />
-          </g>
-        </svg>
-      </div>
-
-      <span id="focusCategoryBadge" class="text-xs font-mono uppercase tracking-widest text-sky-400 bg-sky-950/60 border border-sky-800/80 px-3 py-0.5 rounded-full">
-        Course Focus
-      </span>
-
-      <h2 id="focusMainTitle" class="text-xl sm:text-2xl font-black text-white tracking-wide max-w-xs truncate">
-        Topic Name
-      </h2>
-
-      <!-- Big Countdown Clock -->
-      <div id="focusClock" class="text-7xl sm:text-8xl font-black font-mono tracking-tight text-white drop-shadow-2xl">
-        25:00
-      </div>
-
-      <p id="focusSubState" class="text-xs font-mono text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 justify-center">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-        <span>Deep Focus In Progress</span>
-      </p>
-    </div>
-
-    <!-- Bottom Controls -->
-    <div class="w-full max-w-md flex items-center gap-3 z-10">
-      <button id="focusPauseBtn" onclick="toggleFocusPause()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-mono font-bold text-xs rounded-xl cursor-pointer">
-        Pause
-      </button>
-      <button onclick="endFocusEarly()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30 cursor-pointer">
-        Complete ✓
-      </button>
-      <button onclick="cancelFocusSession()" class="py-3 px-4 bg-slate-900 hover:bg-rose-950 text-slate-400 hover:text-rose-400 font-mono text-xs rounded-xl cursor-pointer">
-        Cancel
-      </button>
     </div>
   </div>
 

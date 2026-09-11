@@ -106,9 +106,6 @@ let currentSession = {
 };
 
 let wakeLockSentinel = null;
-let audioCtx = null;
-let noiseSource = null;
-let isAudioPlaying = false;
 
 const courseThemes = [
   {
@@ -214,9 +211,22 @@ function showView(screen) {
   }
 }
 
+// Quick Cloud Sync
+window.triggerQuickSync = function() {
+  const btn = document.getElementById("quickSyncBtn");
+  const icon = btn ? btn.querySelector("i") : null;
+  if (icon) icon.classList.add("fa-spin");
+
+  persist();
+  setTimeout(() => {
+    renderWorkspace();
+    if (icon) icon.classList.remove("fa-spin");
+  }, 600);
+};
+
 window.handleGoogleSignIn = async function() {
   if (!auth) {
-    alert("Firebase initialized nahi hai! Guest Mode chalu kar rahe hain.");
+    alert("Firebase offline mode. Guest mode chalu ho raha hai.");
     window.continueAsGuest();
     return;
   }
@@ -243,12 +253,7 @@ window.handleGoogleSignIn = async function() {
     updateUserInterface();
     showView("workspace");
   } catch (err) {
-    if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") {
-      console.warn("Login window closed.");
-    } else {
-      console.error("Login failed:", err);
-      alert("Login error: " + err.message);
-    }
+    console.error("Login failed:", err);
   } finally {
     isAuthPending = false;
   }
@@ -529,7 +534,7 @@ function renderHistory() {
   });
 }
 
-// ================= 8. LIQUID GLASS DOCK CONTROLLER =================
+// ================= 8. DOCK CONTROLLER =================
 window.switchDockTab = function(btnElement, tabName) {
   document.querySelectorAll('.nav-tab-item').forEach(item => {
     item.classList.remove('tab-active');
@@ -592,7 +597,7 @@ window.closeCourseDrawer = function() {
   document.getElementById("courseDrawerModal").classList.add("hidden");
 };
 
-// ================= 10. STRICT FOCUS ENGINE (REAL-TIME CLOCK & MASCOT) =================
+// ================= 10. FOCUS ENGINE =================
 window.startCourseFocus = function(courseId, topicId, title, minutes) {
   currentSession = {
     courseId,
@@ -644,6 +649,10 @@ function launchFullScreen() {
   document.getElementById("fullScreenFocus").classList.remove("hidden");
   document.getElementById("cheatWarningBanner").classList.add("hidden");
 
+  // Reset panda to active study state
+  const pandaBox = document.getElementById("pandaContainer");
+  if (pandaBox) pandaBox.classList.remove("panda-sleeping");
+
   document.getElementById("focusCategoryBadge").innerText = currentSession.category;
   document.getElementById("focusMainTitle").innerText = currentSession.title;
   document.getElementById("focusPauseBtn").innerText = "Pause";
@@ -660,11 +669,9 @@ function launchFullScreen() {
     document.documentElement.requestFullscreen().catch(() => {});
   }
 
-  // Real world live clock interval
   if (currentSession.realClockIntervalId) clearInterval(currentSession.realClockIntervalId);
   currentSession.realClockIntervalId = setInterval(updateRealWorldClock, 1000);
 
-  // Study timer countdown interval
   if (currentSession.intervalId) clearInterval(currentSession.intervalId);
   currentSession.intervalId = setInterval(tickFocusClock, 1000);
 }
@@ -695,6 +702,10 @@ document.addEventListener("visibilitychange", () => {
     clearInterval(currentSession.intervalId);
     releaseScreenWakeLock();
     
+    // Panda goes to sleep on pause
+    const pandaBox = document.getElementById("pandaContainer");
+    if (pandaBox) pandaBox.classList.add("panda-sleeping");
+
     document.getElementById("cheatWarningBanner").classList.remove("hidden");
     document.getElementById("focusPauseBtn").innerText = "Resume";
     document.getElementById("focusSubState").innerHTML = `
@@ -707,10 +718,12 @@ document.addEventListener("visibilitychange", () => {
 window.toggleFocusPause = function() {
   const btn = document.getElementById("focusPauseBtn");
   const sub = document.getElementById("focusSubState");
+  const pandaBox = document.getElementById("pandaContainer");
 
   if (currentSession.isPaused) {
     currentSession.isPaused = false;
     btn.innerText = "Pause";
+    if (pandaBox) pandaBox.classList.remove("panda-sleeping");
     sub.innerHTML = `
       <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
       <span>Deep Focus In Progress</span>
@@ -721,9 +734,10 @@ window.toggleFocusPause = function() {
   } else {
     currentSession.isPaused = true;
     btn.innerText = "Resume";
+    if (pandaBox) pandaBox.classList.add("panda-sleeping");
     sub.innerHTML = `
       <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-      <span class="text-amber-400">Session Paused</span>
+      <span class="text-amber-400">Session Paused (Panda Sleeping)</span>
     `;
     releaseScreenWakeLock();
     clearInterval(currentSession.intervalId);
@@ -752,7 +766,6 @@ function exitFullScreen() {
   if (currentSession.realClockIntervalId) clearInterval(currentSession.realClockIntervalId);
   updateResponsiveElements();
   releaseScreenWakeLock();
-  stopAmbientNoise();
 
   if (document.fullscreenElement && document.exitFullscreen) {
     document.exitFullscreen().catch(() => {});
@@ -767,7 +780,7 @@ async function requestScreenWakeLock() {
       wakeLockSentinel = await navigator.wakeLock.request('screen');
     }
   } catch (err) {
-    console.warn("WakeLock request error:", err.message);
+    console.warn("WakeLock error:", err.message);
   }
 }
 
@@ -777,56 +790,6 @@ function releaseScreenWakeLock() {
       wakeLockSentinel = null;
     });
   }
-}
-
-window.toggleSoundEngine = function() {
-  if (!isAudioPlaying) startAmbientNoise();
-  else stopAmbientNoise();
-};
-
-function startAmbientNoise() {
-  try {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const bufferSize = audioCtx.sampleRate * 2;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-
-    noiseSource = audioCtx.createBufferSource();
-    noiseSource.buffer = buffer;
-    noiseSource.loop = true;
-
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 350;
-
-    const gain = audioCtx.createGain();
-    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
-
-    noiseSource.connect(filter);
-    filter.connect(gain);
-    gain.connect(audioCtx.destination);
-    noiseSource.start();
-
-    isAudioPlaying = true;
-    document.getElementById("soundIcon").className = "fa-solid fa-volume-high text-emerald-400";
-    document.getElementById("soundLabel").innerText = "Audio On";
-  } catch (e) {
-    console.warn("Audio Context error:", e);
-  }
-}
-
-function stopAmbientNoise() {
-  if (noiseSource) {
-    noiseSource.stop();
-    noiseSource.disconnect();
-    noiseSource = null;
-  }
-  isAudioPlaying = false;
-  const icon = document.getElementById("soundIcon");
-  const label = document.getElementById("soundLabel");
-  if (icon) icon.className = "fa-solid fa-volume-xmark";
-  if (label) label.innerText = "Audio Off";
 }
 
 function logSessionComplete() {

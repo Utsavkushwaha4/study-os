@@ -22,7 +22,6 @@
   scrollbar-width: none;
 }
 
-/* Hard Mobile Lock for Desktop Sidebar */
 @media (max-width: 1023px) {
   #desktopSidebar {
     display: none !important;
@@ -33,28 +32,21 @@
   }
 }
 
-/* ================= LIQUID GLASS CAPSULE DOCK ================= */
+/* ================= LIQUID GLASS TASKBAR CONTRAST ================= */
 .liquid-glass-dock {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(245, 245, 247, 0.75);
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  box-shadow: 
-    0 20px 45px -10px rgba(0, 0, 0, 0.35),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 .dark .liquid-glass-dock {
-  background: rgba(18, 26, 43, 0.42);
-  backdrop-filter: blur(32px) saturate(210%);
-  -webkit-backdrop-filter: blur(32px) saturate(210%);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.65),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.22);
+  background: rgba(18, 26, 43, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
-/* Nav Tab Item */
 .nav-tab-item {
   position: relative;
   display: flex;
@@ -65,66 +57,94 @@
   min-width: 58px;
   padding: 4px 6px;
   border-radius: 9999px;
-  color: rgba(255, 255, 255, 0.75);
+  color: #64748b;
   transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dark .nav-tab-item {
+  color: #94a3b8;
 }
 
 .nav-tab-item:active {
   transform: scale(0.92);
 }
 
+/* Active Highlight Bubble */
 .nav-tab-item.tab-active {
-  color: #38bdf8 !important;
-  background: rgba(255, 255, 255, 0.28);
-  box-shadow: 
-    0 8px 20px -4px rgba(0, 0, 0, 0.2),
-    inset 0 1px 2px rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #0284c7 !important;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .dark .nav-tab-item.tab-active {
   color: #38bdf8 !important;
   background: rgba(255, 255, 255, 0.14);
-  box-shadow: 
-    0 10px 24px -4px rgba(0, 0, 0, 0.4),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .nav-exit-btn {
-  color: rgba(244, 63, 94, 0.85);
-  transition: all 0.2s ease;
+  color: #e11d48 !important;
 }
 .nav-exit-btn:hover {
-  color: #f43f5e;
   background: rgba(244, 63, 94, 0.15);
 }
 
-/* ================= ANIMATED STUDY PANDA (CSS SVG) ================= */
-.panda-box {
-  animation: panda-sway 3.2s ease-in-out infinite alternate;
+/* ================= FULL INTERACTIVE DYNAMIC PANDA ================= */
+.interactive-panda {
+  position: relative;
+  width: 130px;
+  height: 120px;
+  animation: panda-patrol 9s ease-in-out infinite;
+  transform-origin: bottom center;
 }
 
-@keyframes panda-sway {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-3px) rotate(1.5deg); }
-  100% { transform: translateY(0px) rotate(-1deg); }
+/* Patrol animation (walk left-right & sit) */
+@keyframes panda-patrol {
+  0% { transform: translateX(0px) rotate(0deg); }
+  25% { transform: translateX(25px) rotate(2deg); }
+  30% { transform: translateX(25px) rotate(-1deg); }
+  50% { transform: translateX(0px) rotate(0deg); }
+  75% { transform: translateX(-25px) rotate(-2deg); }
+  80% { transform: translateX(-25px) rotate(1deg); }
+  100% { transform: translateX(0px) rotate(0deg); }
 }
 
-.panda-hands {
-  animation: typing-paws 0.45s ease-in-out infinite alternate;
+.panda-ears {
+  animation: ears-twitch 3s ease-in-out infinite;
   transform-origin: center;
 }
-
-@keyframes typing-paws {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-2px); }
+@keyframes ears-twitch {
+  0%, 80%, 100% { transform: rotate(0deg); }
+  85% { transform: rotate(-6deg); }
+  90% { transform: rotate(6deg); }
 }
 
-.panda-ear-left {
-  animation: ear-wiggle 4s ease-in-out infinite;
+.panda-typing-arms {
+  animation: arm-tap 0.35s ease-in-out infinite alternate;
+  transform-origin: top center;
 }
-@keyframes ear-wiggle {
-  0%, 90%, 100% { transform: rotate(0deg); }
-  95% { transform: rotate(-8deg); }
+@keyframes arm-tap {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-3px); }
+}
+
+.panda-feet {
+  animation: feet-bob 0.5s ease-in-out infinite alternate;
+}
+@keyframes feet-bob {
+  0% { transform: scaleY(1); }
+  100% { transform: scaleY(0.94); }
+}
+
+/* Sleep state when paused */
+.panda-sleeping .interactive-panda {
+  animation: none !important;
+  transform: translateY(8px) scaleY(0.9) !important;
+  filter: brightness(0.8);
+}
+.panda-sleeping .panda-typing-arms {
+  animation: none !important;
+  transform: translateY(4px) !important;
 }
