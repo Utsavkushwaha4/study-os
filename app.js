@@ -176,15 +176,15 @@ function applyTheme(theme) {
 function updateResponsiveElements() {
   const workspaceView = document.getElementById("mainWorkspaceView");
   const desktopSidebar = document.getElementById("desktopSidebar");
-  const bottomBar = document.getElementById("bottomTaskbar");
+  const bottomBarWrapper = document.getElementById("bottomTaskbarWrapper");
 
   if (workspaceView && !workspaceView.classList.contains("hidden")) {
     if (window.innerWidth >= 1024) {
       if (desktopSidebar) desktopSidebar.style.setProperty("display", "flex", "important");
-      if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
+      if (bottomBarWrapper) bottomBarWrapper.style.setProperty("display", "none", "important");
     } else {
       if (desktopSidebar) desktopSidebar.style.setProperty("display", "none", "important");
-      if (bottomBar) bottomBar.style.setProperty("display", "flex", "important");
+      if (bottomBarWrapper) bottomBarWrapper.style.setProperty("display", "flex", "important");
     }
   }
 }
@@ -194,7 +194,7 @@ window.addEventListener("resize", updateResponsiveElements);
 function showView(screen) {
   const authView = document.getElementById("authGatewayView");
   const workspaceView = document.getElementById("mainWorkspaceView");
-  const bottomBar = document.getElementById("bottomTaskbar");
+  const bottomBarWrapper = document.getElementById("bottomTaskbarWrapper");
   const desktopSidebar = document.getElementById("desktopSidebar");
 
   if (screen === "workspace") {
@@ -208,7 +208,7 @@ function showView(screen) {
   } else {
     workspaceView.classList.add("hidden");
     if (desktopSidebar) desktopSidebar.style.setProperty("display", "none", "important");
-    if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
+    if (bottomBarWrapper) bottomBarWrapper.style.setProperty("display", "none", "important");
     authView.classList.remove("hidden");
   }
 }
@@ -266,11 +266,13 @@ window.continueAsGuest = function() {
 };
 
 window.handleSignOut = async function() {
-  if (auth && currentUser?.uid !== "guest_user") {
-    await signOut(auth);
+  if (confirm("Kya aap StudyOS se logout karna chahte hain?")) {
+    if (auth && currentUser?.uid !== "guest_user") {
+      await signOut(auth);
+    }
+    currentUser = null;
+    showView("auth");
   }
-  currentUser = null;
-  showView("auth");
 };
 
 if (auth) {
@@ -526,7 +528,33 @@ function renderHistory() {
   });
 }
 
-// ================= 8. COURSE CHAPTERS DRAWER =================
+// ================= 8. CAPSULE DOCK TAB CONTROLLER =================
+window.switchDockTab = function(btnElement, tabName) {
+  // Reset all tabs to circular glass buttons
+  document.querySelectorAll('.dock-tab-btn').forEach(button => {
+    button.className = "dock-tab-btn dock-circle-btn rounded-full flex items-center justify-center gap-2 cursor-pointer";
+    const label = button.querySelector('.dock-tab-title');
+    if (label) label.classList.add('hidden');
+  });
+
+  // Expand clicked button to solid pill
+  btnElement.className = "dock-tab-btn dock-active-pill rounded-full flex items-center justify-center gap-2 cursor-pointer";
+  const activeLabel = btnElement.querySelector('.dock-tab-title');
+  if (activeLabel) activeLabel.classList.remove('hidden');
+
+  // Smooth scroll to sections
+  if (tabName === 'home') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (tabName === 'courses') {
+    const el = document.getElementById('coursesSection');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  } else if (tabName === 'history') {
+    const el = document.getElementById('historySection');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+// ================= 9. COURSE CHAPTERS DRAWER =================
 window.openCourseDrawer = function(courseId) {
   const course = appState.courses.find(c => c.id === courseId);
   if (!course) return;
@@ -568,7 +596,7 @@ window.closeCourseDrawer = function() {
   document.getElementById("courseDrawerModal").classList.add("hidden");
 };
 
-// ================= 9. STRICT FOCUS ENGINE =================
+// ================= 10. STRICT FOCUS ENGINE =================
 window.startCourseFocus = function(courseId, topicId, title, minutes) {
   currentSession = {
     courseId,
@@ -605,8 +633,8 @@ window.startSelfStudy = function() {
 function launchFullScreen() {
   document.getElementById("mainWorkspaceView").classList.add("hidden");
   
-  const bottomBar = document.getElementById("bottomTaskbar");
-  if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
+  const bottomBarWrapper = document.getElementById("bottomTaskbarWrapper");
+  if (bottomBarWrapper) bottomBarWrapper.style.setProperty("display", "none", "important");
   
   document.getElementById("fullScreenFocus").classList.remove("hidden");
   document.getElementById("cheatWarningBanner").classList.add("hidden");
@@ -798,7 +826,7 @@ function logSessionComplete() {
   persist();
 }
 
-// ================= 10. MODAL ACTIONS =================
+// ================= 11. MODAL ACTIONS =================
 window.openAddCourseModal = function() {
   tempTopics = [];
   document.getElementById("modalCourseTitle").value = "";

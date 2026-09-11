@@ -20,7 +20,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 
   <script>
@@ -159,7 +159,7 @@
   </aside>
 
   <!-- ================= VIEW 3: MAIN WORKSPACE ================= -->
-  <div id="mainWorkspaceView" class="hidden flex-1 w-full max-w-6xl mx-auto px-4 lg:px-10 pt-0 pb-28 lg:pb-12 relative z-10">
+  <div id="mainWorkspaceView" class="hidden flex-1 w-full max-w-6xl mx-auto px-4 lg:px-10 pt-0 pb-32 lg:pb-12 relative z-10">
 
     <!-- Sticky Mobile App Bar -->
     <header class="sticky top-0 z-30 bg-slate-50/90 dark:bg-[#070b14]/90 backdrop-blur-md pt-3 pb-2.5 mb-3 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-800/50 lg:hidden">
@@ -184,9 +184,6 @@
         </span>
         <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-amber-400 flex items-center justify-center text-xs shadow-sm cursor-pointer">
           <i id="themeIconMobile" class="fa-solid fa-moon"></i>
-        </button>
-        <button onclick="handleSignOut()" class="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-500 flex items-center justify-center text-xs cursor-pointer">
-          <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>
     </header>
@@ -235,20 +232,20 @@
           </div>
         </div>
 
-        <div onclick="openSelfStudyModal()" class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-3xl p-4 sm:p-5 flex items-center justify-between lg:flex-col lg:justify-between shadow-sm cursor-pointer hover:border-pink-300 dark:hover:border-pink-500 transition group">
+        <div onclick="openSelfStudyModal()" class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-3xl p-4 sm:p-5 flex items-center justify-between lg:flex-col lg:justify-between shadow-sm cursor-pointer hover:border-amber-300 dark:hover:border-amber-500 transition group">
           <div class="flex items-center gap-3 lg:w-full">
-            <div class="w-11 h-11 rounded-2xl bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-900/60 flex items-center justify-center text-pink-500 text-lg shadow-sm flex-shrink-0">
-              <i class="fa-solid fa-bullseye"></i>
+            <div class="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 flex items-center justify-center text-amber-500 text-lg shadow-sm flex-shrink-0">
+              <i class="fa-solid fa-shield-halved"></i>
             </div>
             <div>
               <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Today's Focus</span>
-              <h4 id="activeFocusTitle" class="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-white group-hover:text-pink-500 transition">Strict Focus Session</h4>
+              <h4 id="activeFocusTitle" class="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-white group-hover:text-amber-500 transition">Strict Focus Session</h4>
             </div>
           </div>
           <div class="w-7 h-7 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-xs lg:hidden">
-            <i class="fa-solid fa-play text-[9px] text-pink-500"></i>
+            <i class="fa-solid fa-play text-[9px] text-amber-500"></i>
           </div>
-          <div class="hidden lg:flex w-full pt-2 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-xs font-bold text-pink-500">
+          <div class="hidden lg:flex w-full pt-2 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-xs font-bold text-amber-500">
             <span>Start Guarded Session</span>
             <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
           </div>
@@ -308,11 +305,11 @@
       </section>
 
       <!-- Active Courses -->
-      <section class="space-y-3">
+      <section id="coursesSection" class="space-y-3">
         <div class="flex items-center justify-between px-1">
           <div>
             <h3 class="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">Your Courses</h3>
-            <p class="text-[10px] text-slate-400">Tap to expand course chapters and start focus</p>
+            <p class="text-[10px] text-slate-400">Tap to view chapters and start learning</p>
           </div>
           <button onclick="openAddCourseModal()" class="text-xs font-bold text-sky-500 hover:text-sky-600 flex items-center gap-1 cursor-pointer">
             <span>+ Add Course</span>
@@ -322,7 +319,7 @@
       </section>
 
       <!-- History Feed -->
-      <section class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-2xl p-4 shadow-sm space-y-3">
+      <section id="historySection" class="bg-white dark:bg-app-cardDark border border-slate-200 dark:border-app-borderDark rounded-2xl p-4 shadow-sm space-y-3">
         <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
           <div>
             <h4 class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Today's Study History</h4>
@@ -357,39 +354,47 @@
     </div>
   </div>
 
-  <!-- ================= FIXED BOTTOM TASKBAR ================= -->
-  <nav id="bottomTaskbar" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 max-w-md mx-auto py-2 px-6 items-center justify-between shadow-2xl lg:hidden">
-    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center gap-1 text-sky-500 font-bold cursor-pointer">
-      <div class="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-950 flex items-center justify-center text-sm">
-        <i class="fa-solid fa-house"></i>
+  <!-- ================= FLOATING TRANSPARENT GLASS CAPSULE DOCK (MOBILE ONLY) ================= -->
+  <div id="bottomTaskbarWrapper" class="hidden fixed bottom-5 left-0 right-0 z-40 justify-center px-3 pointer-events-none lg:hidden">
+    <nav id="bottomTaskbar" class="pointer-events-auto glass-dock px-2.5 py-1.5 rounded-full flex items-center gap-1.5 sm:gap-2">
+      
+      <!-- 1. Home (Active by Default) -->
+      <button onclick="switchDockTab(this, 'home')" class="dock-tab-btn dock-active-pill rounded-full flex items-center justify-center gap-2 cursor-pointer">
+        <i class="fa-solid fa-house text-sm"></i>
+        <span class="dock-tab-title text-xs font-bold whitespace-nowrap inline-block">Home</span>
+      </button>
+
+      <!-- 2. Courses -->
+      <button onclick="switchDockTab(this, 'courses')" class="dock-tab-btn dock-circle-btn rounded-full flex items-center justify-center gap-2 cursor-pointer" title="Courses">
+        <i class="fa-solid fa-book text-sm"></i>
+        <span class="dock-tab-title text-xs font-bold whitespace-nowrap hidden">Courses</span>
+      </button>
+
+      <!-- 3. Center Hero Focus Button (Floating & Illuminated) -->
+      <div class="relative -translate-y-3 flex items-center justify-center mx-0.5">
+        <div class="focus-glow-ring"></div>
+        <button onclick="openSelfStudyModal()" class="focus-hero-btn rounded-full flex flex-col items-center justify-center cursor-pointer shadow-lg" title="Strict Focus Session">
+          <i class="fa-solid fa-shield-halved text-base"></i>
+          <span class="text-[7.5px] font-mono font-bold tracking-tighter uppercase leading-none mt-0.5">Focus</span>
+        </button>
       </div>
-      <span class="text-[10px]">Home</span>
-    </button>
-    <button onclick="openAddCourseModal()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
-      <div class="w-8 h-8 flex items-center justify-center text-sm">
-        <i class="fa-solid fa-book"></i>
-      </div>
-      <span class="text-[10px]">Courses</span>
-    </button>
-    <button onclick="openSelfStudyModal()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-500 -mt-3 cursor-pointer">
-      <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-400 to-amber-500 text-white flex items-center justify-center text-base shadow-lg shadow-amber-500/30">
-        <i class="fa-solid fa-shield-halved"></i>
-      </div>
-      <span class="text-[9px] font-bold">Focus</span>
-    </button>
-    <button onclick="document.getElementById('historyList').scrollIntoView({behavior: 'smooth'})" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
-      <div class="w-8 h-8 flex items-center justify-center text-sm">
-        <i class="fa-solid fa-chart-simple"></i>
-      </div>
-      <span class="text-[10px]">History</span>
-    </button>
-    <button onclick="handleSignOut()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-rose-500 cursor-pointer">
-      <div class="w-8 h-8 flex items-center justify-center text-sm">
-        <i class="fa-solid fa-right-from-bracket"></i>
-      </div>
-      <span class="text-[10px]">Logout</span>
-    </button>
-  </nav>
+
+      <!-- 4. History -->
+      <button onclick="switchDockTab(this, 'history')" class="dock-tab-btn dock-circle-btn rounded-full flex items-center justify-center gap-2 cursor-pointer" title="History">
+        <i class="fa-solid fa-chart-simple text-sm"></i>
+        <span class="dock-tab-title text-xs font-bold whitespace-nowrap hidden">History</span>
+      </button>
+
+      <!-- Divider -->
+      <div class="w-[1px] h-5 bg-slate-300 dark:bg-slate-700/60 mx-0.5"></div>
+
+      <!-- 5. Exit / Logout -->
+      <button onclick="handleSignOut()" class="dock-exit-btn rounded-full flex items-center justify-center cursor-pointer" title="Exit / Logout">
+        <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+      </button>
+
+    </nav>
+  </div>
 
   <!-- Modals -->
   <div id="selfStudyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
