@@ -32,7 +32,7 @@
   }
 }
 
-/* ================= LIQUID GLASS TASKBAR CONTRAST ================= */
+/* ================= LIQUID GLASS TASKBAR ================= */
 .liquid-glass-dock {
   background: rgba(245, 245, 247, 0.75);
   backdrop-filter: blur(28px) saturate(190%);
@@ -69,7 +69,6 @@
   transform: scale(0.92);
 }
 
-/* Active Highlight Bubble */
 .nav-tab-item.tab-active {
   color: #0284c7 !important;
   background: #ffffff;
@@ -91,7 +90,7 @@
   background: rgba(244, 63, 94, 0.15);
 }
 
-/* ================= FULL INTERACTIVE DYNAMIC PANDA ================= */
+/* ================= PANDA PATROL MASCOT ================= */
 .interactive-panda {
   position: relative;
   width: 130px;
@@ -100,7 +99,6 @@
   transform-origin: bottom center;
 }
 
-/* Patrol animation (walk left-right & sit) */
 @keyframes panda-patrol {
   0% { transform: translateX(0px) rotate(0deg); }
   25% { transform: translateX(25px) rotate(2deg); }
@@ -138,7 +136,6 @@
   100% { transform: scaleY(0.94); }
 }
 
-/* Sleep state when paused */
 .panda-sleeping .interactive-panda {
   animation: none !important;
   transform: translateY(8px) scaleY(0.9) !important;

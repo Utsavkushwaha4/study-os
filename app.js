@@ -41,53 +41,17 @@ try {
   console.warn("Firebase running in offline mode.");
 }
 
-// ================= 2. LOCAL STATE =================
-const STORAGE_KEY = "study_os_app_state_v6";
+// ================= 2. LOCAL STATE (COURSES EMPTY INITIALLY) =================
+const STORAGE_KEY = "study_os_app_state_v7";
 
 let appState = {
-  courses: [
-    {
-      id: "c_1",
-      name: "Creative Sketching",
-      topics: [
-        { id: "t_11", name: "Pencil Gradients & Shading", time: 30, done: true },
-        { id: "t_12", name: "Perspective Drawing Basics", time: 35, done: true },
-        { id: "t_13", name: "Anatomy of Faces", time: 40, done: false },
-        { id: "t_14", name: "Digital Line Art", time: 30, done: false },
-        { id: "t_15", name: "Color Theory & Lighting", time: 45, done: false }
-      ]
-    },
-    {
-      id: "c_2",
-      name: "Web Development",
-      topics: [
-        { id: "t_21", name: "Semantic HTML & Accessibility", time: 30, done: true },
-        { id: "t_22", name: "Tailwind CSS Layout Mastery", time: 45, done: false },
-        { id: "t_23", name: "Modern JS DOM & Async", time: 45, done: false },
-        { id: "t_24", name: "Full-Stack API Integrations", time: 60, done: false }
-      ]
-    },
-    {
-      id: "c_3",
-      name: "AI & Machine Learning",
-      topics: [
-        { id: "t_31", name: "Linear Algebra & Vectors", time: 40, done: false },
-        { id: "t_32", name: "Gradient Descent & Backprop", time: 45, done: false },
-        { id: "t_33", name: "Transformers & Attention", time: 60, done: false },
-        { id: "t_34", name: "RAG & Vector Embeddings", time: 50, done: false }
-      ]
-    }
-  ],
+  courses: [], // Empty initially for the user to add
   history: [],
-  dailyTasks: [
-    { id: "tsk_1", title: "Complete 1 Math Module", done: true },
-    { id: "tsk_2", title: "Write Review Notes", done: true },
-    { id: "tsk_3", title: "Deep Focus Session (45m)", done: true },
-    { id: "tsk_4", title: "Push code to GitHub", done: false }
-  ],
+  dailyTasks: [],
+  dailyTasksDate: new Date().toLocaleDateString(), // 1-Day Auto-Reset Tracker
   streak: {
-    current: 2,
-    best: 5,
+    current: 1,
+    best: 1,
     lastActiveDate: new Date().toLocaleDateString()
   }
 };
@@ -97,7 +61,7 @@ let currentSession = {
   courseId: null,
   topicId: null,
   title: "",
-  category: "Course Focus",
+  category: "Self Study",
   totalMinutes: 25,
   remainingSeconds: 25 * 60,
   intervalId: null,
@@ -170,7 +134,7 @@ function applyTheme(theme) {
   localStorage.setItem('studyos_theme', theme);
 }
 
-// ================= 4. AUTH & SCREEN ROUTING =================
+// ================= 4. AUTH & NAVIGATION =================
 function updateResponsiveElements() {
   const workspaceView = document.getElementById("mainWorkspaceView");
   const desktopSidebar = document.getElementById("desktopSidebar");
@@ -199,8 +163,9 @@ function showView(screen) {
     authView.classList.add("hidden");
     workspaceView.classList.remove("hidden");
     
+    checkDailyTasksAutoReset();
     updateResponsiveElements();
-    updateGreeting();
+    updateInspiringGreeting();
     renderWeeklyCalendar();
     renderWorkspace();
   } else {
@@ -211,7 +176,7 @@ function showView(screen) {
   }
 }
 
-// Quick Cloud Sync
+// Quick Sync Action
 window.triggerQuickSync = function() {
   const btn = document.getElementById("quickSyncBtn");
   const icon = btn ? btn.querySelector("i") : null;
@@ -221,7 +186,7 @@ window.triggerQuickSync = function() {
   setTimeout(() => {
     renderWorkspace();
     if (icon) icon.classList.remove("fa-spin");
-  }, 600);
+  }, 500);
 };
 
 window.handleGoogleSignIn = async function() {
@@ -246,6 +211,8 @@ window.handleGoogleSignIn = async function() {
         lastLogin: new Date().toLocaleString(),
         courses: appState.courses,
         history: appState.history,
+        dailyTasks: appState.dailyTasks,
+        dailyTasksDate: appState.dailyTasksDate,
         streak: appState.streak
       }, { merge: true });
     }
@@ -291,7 +258,9 @@ if (auth) {
       onSnapshot(userDocRef, (snap) => {
         if (snap.exists() && snap.data().courses) {
           appState = snap.data();
+          if (!appState.courses) appState.courses = [];
           if (!appState.dailyTasks) appState.dailyTasks = [];
+          if (!appState.dailyTasksDate) appState.dailyTasksDate = new Date().toLocaleDateString();
           if (!appState.streak) appState.streak = { current: 1, best: 1, lastActiveDate: new Date().toLocaleDateString() };
         } else {
           loadLocalState();
@@ -306,16 +275,30 @@ if (auth) {
   });
 }
 
-function updateGreeting() {
+// 4. INSPIRING GREETINGS (NEVER "GOOD NIGHT")
+function updateInspiringGreeting() {
   const hour = new Date().getHours();
-  let greet = "Good Day";
-  if (hour >= 4 && hour < 12) greet = "Good Morning";
-  else if (hour >= 12 && hour < 17) greet = "Good Afternoon";
-  else if (hour >= 17 && hour < 22) greet = "Good Evening";
-  else greet = "Good Night";
+  let greet = "Keep Building";
+  let quote = "Every single chapter completed brings you closer to your mastery.";
+
+  if (hour >= 4 && hour < 12) {
+    greet = "Rise & Conquer";
+    quote = "Minds are freshest in the morning. Let's make today count!";
+  } else if (hour >= 12 && hour < 17) {
+    greet = "Powering Through";
+    quote = "Consistency beats intensity. Stay focused on your goals!";
+  } else if (hour >= 17 && hour < 22) {
+    greet = "Level Up Tonight";
+    quote = "Deep focus hours. Your dedication right now defines your future.";
+  } else {
+    greet = "Midnight Scholar";
+    quote = "Late night work builds silent empires. Keep coding and learning!";
+  }
 
   const el = document.getElementById("heroGreetingText");
+  const quoteEl = document.getElementById("heroInspireQuote");
   if (el) el.innerText = greet;
+  if (quoteEl) quoteEl.innerText = quote;
 }
 
 function updateUserInterface() {
@@ -340,7 +323,99 @@ function updateUserInterface() {
   }
 }
 
-// ================= 5. WEEKLY CALENDAR STRIP =================
+// ================= 5. 1-DAY AUTO-RESET TODO LIST =================
+function checkDailyTasksAutoReset() {
+  const todayStr = new Date().toLocaleDateString();
+  if (appState.dailyTasksDate !== todayStr) {
+    // New day detected: Reset tasks list
+    appState.dailyTasks = [];
+    appState.dailyTasksDate = todayStr;
+    persist();
+  }
+
+  const badge = document.getElementById("todoDateBadge");
+  if (badge) badge.innerText = todayStr;
+}
+
+window.addDailyTask = function() {
+  const input = document.getElementById("dailyTaskInput");
+  const text = input ? input.value.trim() : "";
+  if (!text) return;
+
+  if (!appState.dailyTasks) appState.dailyTasks = [];
+  appState.dailyTasks.push({
+    id: "task_" + Date.now(),
+    title: text,
+    done: false
+  });
+
+  input.value = "";
+  persist();
+  renderDailyTodoList();
+  renderMetrics();
+};
+
+window.toggleDailyTask = function(taskId) {
+  const t = appState.dailyTasks.find(x => x.id === taskId);
+  if (t) {
+    t.done = !t.done;
+    persist();
+    renderDailyTodoList();
+    renderMetrics();
+  }
+};
+
+window.deleteDailyTask = function(taskId) {
+  appState.dailyTasks = appState.dailyTasks.filter(x => x.id !== taskId);
+  persist();
+  renderDailyTodoList();
+  renderMetrics();
+};
+
+function renderDailyTodoList() {
+  const container = document.getElementById("dailyTodoListContainer");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const tasks = appState.dailyTasks || [];
+
+  if (tasks.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+        <p class="text-xs text-slate-400">Aaj ke liye koi task nahi hai. Upar se add karein!</p>
+      </div>
+    `;
+    return;
+  }
+
+  tasks.forEach((t) => {
+    const row = document.createElement("div");
+    row.className = `flex items-center justify-between p-2.5 rounded-xl border transition ${
+      t.done 
+        ? "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40" 
+        : "bg-slate-50 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800"
+    }`;
+
+    row.innerHTML = `
+      <div class="flex items-center gap-2.5 min-w-0 cursor-pointer" onclick="toggleDailyTask('${t.id}')">
+        <div class="w-4 h-4 rounded-md border flex items-center justify-center transition ${
+          t.done ? "bg-emerald-500 border-emerald-500 text-white" : "border-slate-400 dark:border-slate-600"
+        }">
+          ${t.done ? '<i class="fa-solid fa-check text-[9px]"></i>' : ''}
+        </div>
+        <span class="text-xs ${t.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200 font-medium'} truncate">
+          ${t.title}
+        </span>
+      </div>
+      <button onclick="deleteDailyTask('${t.id}')" class="text-slate-400 hover:text-rose-500 text-xs px-1 cursor-pointer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ================= 6. WEEKLY CALENDAR STRIP =================
 function renderWeeklyCalendar() {
   const container = document.getElementById("weeklyCalendarRow");
   if (!container) return;
@@ -381,7 +456,7 @@ function renderWeeklyCalendar() {
   }
 }
 
-// ================= 6. PERSISTENCE ENGINE =================
+// ================= 7. PERSISTENCE ENGINE =================
 function loadLocalState() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
@@ -400,15 +475,17 @@ function persist() {
       courses: appState.courses,
       history: appState.history,
       dailyTasks: appState.dailyTasks || [],
+      dailyTasksDate: appState.dailyTasksDate || new Date().toLocaleDateString(),
       streak: appState.streak || { current: 1, best: 1 },
       lastUpdated: new Date().toISOString()
     }, { merge: true }).catch(e => console.error("Cloud push failed:", e));
   }
 }
 
-// ================= 7. WORKSPACE RENDERING =================
+// ================= 8. WORKSPACE RENDERING =================
 function renderWorkspace() {
   renderMetrics();
+  renderDailyTodoList();
   renderCourses();
   renderHistory();
 }
@@ -425,7 +502,7 @@ function renderMetrics() {
   const pctElem = document.getElementById("kpiProgressPct");
   if (pctElem) pctElem.innerText = `${pct}%`;
 
-  const streak = appState.streak || { current: 2, best: 5 };
+  const streak = appState.streak || { current: 1, best: 1 };
   const streakElem = document.getElementById("kpiStreakDays");
   if (streakElem) streakElem.innerText = `${streak.current} d`;
 
@@ -441,6 +518,7 @@ function renderMetrics() {
   const timeElem = document.getElementById("kpiTodayStudyTime");
   if (timeElem) timeElem.innerText = timeFormatted;
 
+  // Track daily tasks done in the top KPI
   const tasks = appState.dailyTasks || [];
   const completed = tasks.filter(t => t.done).length;
   const tasksElem = document.getElementById("kpiCompletedTasksCount");
@@ -452,11 +530,13 @@ function renderCourses() {
   if (!container) return;
   container.innerHTML = "";
 
-  if (appState.courses.length === 0) {
+  if (!appState.courses || appState.courses.length === 0) {
     container.className = "col-span-full";
     container.innerHTML = `
-      <div class="text-center py-10 border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl w-full">
-        <p class="text-xs text-slate-400">Abhi koi course nahi hai. Upar "+ Add Course" se shuru karein!</p>
+      <div class="text-center py-12 border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl w-full bg-slate-50/50 dark:bg-slate-900/30">
+        <span class="text-3xl select-none">📚</span>
+        <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mt-2">No Courses Added Yet</h4>
+        <p class="text-[11px] text-slate-400 max-w-xs mx-auto mt-1">Upar diye gaye "+ Add Course" button se apna pehla subject add karein!</p>
       </div>
     `;
     return;
@@ -512,7 +592,7 @@ function renderHistory() {
   totalDisplay.innerText = `${totalMins} Mins`;
 
   if (todayHistory.length === 0) {
-    container.innerHTML = `<p class="text-xs text-slate-400 py-2 text-center">Aaj abhi tak koi focus session log nahi hua.</p>`;
+    container.innerHTML = `<p class="text-xs text-slate-400 py-2 text-center">Aaj abhi tak koi session log nahi hua.</p>`;
     return;
   }
 
@@ -534,7 +614,7 @@ function renderHistory() {
   });
 }
 
-// ================= 8. DOCK CONTROLLER =================
+// ================= 9. DOCK CONTROLLER =================
 window.switchDockTab = function(btnElement, tabName) {
   document.querySelectorAll('.nav-tab-item').forEach(item => {
     item.classList.remove('tab-active');
@@ -555,7 +635,7 @@ window.switchDockTab = function(btnElement, tabName) {
   }
 };
 
-// ================= 9. COURSE CHAPTERS DRAWER =================
+// ================= 10. COURSE CHAPTERS DRAWER =================
 window.openCourseDrawer = function(courseId) {
   const course = appState.courses.find(c => c.id === courseId);
   if (!course) return;
@@ -597,7 +677,7 @@ window.closeCourseDrawer = function() {
   document.getElementById("courseDrawerModal").classList.add("hidden");
 };
 
-// ================= 10. FOCUS ENGINE =================
+// ================= 11. FOCUS / SELF STUDY ENGINE =================
 window.startCourseFocus = function(courseId, topicId, title, minutes) {
   currentSession = {
     courseId,
@@ -614,7 +694,7 @@ window.startCourseFocus = function(courseId, topicId, title, minutes) {
 };
 
 window.startSelfStudy = function() {
-  const subject = document.getElementById("selfStudySubject").value.trim() || "Independent Focus";
+  const subject = document.getElementById("selfStudySubject").value.trim() || "Self Study";
   const mins = parseInt(document.getElementById("selfStudyMinutes").value) || 30;
 
   currentSession = {
@@ -649,7 +729,6 @@ function launchFullScreen() {
   document.getElementById("fullScreenFocus").classList.remove("hidden");
   document.getElementById("cheatWarningBanner").classList.add("hidden");
 
-  // Reset panda to active study state
   const pandaBox = document.getElementById("pandaContainer");
   if (pandaBox) pandaBox.classList.remove("panda-sleeping");
 
@@ -702,7 +781,6 @@ document.addEventListener("visibilitychange", () => {
     clearInterval(currentSession.intervalId);
     releaseScreenWakeLock();
     
-    // Panda goes to sleep on pause
     const pandaBox = document.getElementById("pandaContainer");
     if (pandaBox) pandaBox.classList.add("panda-sleeping");
 
@@ -812,7 +890,7 @@ function logSessionComplete() {
   persist();
 }
 
-// ================= 11. MODAL ACTIONS =================
+// ================= 12. MODAL ACTIONS =================
 window.openAddCourseModal = function() {
   tempTopics = [];
   document.getElementById("modalCourseTitle").value = "";
