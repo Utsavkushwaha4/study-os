@@ -10,8 +10,16 @@ import {
   getFirestore, 
   doc, 
   setDoc, 
+  getDoc,
+  collection,
+  getDocs,
   onSnapshot 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// ================= ADMIN CONFIGURATION =================
+const ADMIN_EMAILS = [
+  "admin@studyos.com" // Yahan apni exact admin Gmail ID add kar sakte hain
+];
 
 // ================= 1. FIREBASE SETUP =================
 const firebaseConfig = {
@@ -28,6 +36,8 @@ let db = null;
 let provider = null;
 let currentUser = null;
 let isAuthPending = false;
+let isAdminUser = false;
+let allFetchedScholars = [];
 
 try {
   if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
@@ -44,52 +54,16 @@ try {
 }
 
 // ================= 2. LOCAL STATE =================
-const STORAGE_KEY = "study_os_app_state_v6";
+const STORAGE_KEY = "study_os_app_state_v7";
 
 let appState = {
-  courses: [
-    {
-      id: "c_1",
-      name: "Creative Sketching",
-      topics: [
-        { id: "t_11", name: "Pencil Gradients & Shading", time: 30, done: true },
-        { id: "t_12", name: "Perspective Drawing Basics", time: 35, done: true },
-        { id: "t_13", name: "Anatomy of Faces", time: 40, done: false },
-        { id: "t_14", name: "Digital Line Art", time: 30, done: false },
-        { id: "t_15", name: "Color Theory & Lighting", time: 45, done: false }
-      ]
-    },
-    {
-      id: "c_2",
-      name: "Web Development",
-      topics: [
-        { id: "t_21", name: "Semantic HTML & Accessibility", time: 30, done: true },
-        { id: "t_22", name: "Tailwind CSS Layout Mastery", time: 45, done: false },
-        { id: "t_23", name: "Modern JS DOM & Async", time: 45, done: false },
-        { id: "t_24", name: "Full-Stack API Integrations", time: 60, done: false }
-      ]
-    },
-    {
-      id: "c_3",
-      name: "AI & Machine Learning",
-      topics: [
-        { id: "t_31", name: "Linear Algebra & Vectors", time: 40, done: false },
-        { id: "t_32", name: "Gradient Descent & Backprop", time: 45, done: false },
-        { id: "t_33", name: "Transformers & Attention", time: 60, done: false },
-        { id: "t_34", name: "RAG & Vector Embeddings", time: 50, done: false }
-      ]
-    }
-  ],
+  courses: [], // Empty initially for user to add
   history: [],
-  dailyTasks: [
-    { id: "tsk_1", title: "Complete 1 Math Module", done: true },
-    { id: "tsk_2", title: "Write Review Notes", done: true },
-    { id: "tsk_3", title: "Deep Focus Session (45m)", done: true },
-    { id: "tsk_4", title: "Push code to GitHub", done: false }
-  ],
+  dailyTasks: [],
+  dailyTasksDate: new Date().toLocaleDateString(), // Tracks 1-day auto-reset
   streak: {
-    current: 2,
-    best: 5,
+    current: 1,
+    best: 1,
     lastActiveDate: new Date().toLocaleDateString()
   }
 };
@@ -99,7 +73,7 @@ let currentSession = {
   courseId: null,
   topicId: null,
   title: "",
-  category: "Course Focus",
+  category: "Self Study",
   totalMinutes: 25,
   remainingSeconds: 25 * 60,
   intervalId: null,
@@ -174,14 +148,17 @@ function applyTheme(theme) {
   localStorage.setItem('studyos_theme', theme);
 }
 
-// ================= 4. AUTH & SCREEN ROUTING (FIXED PC & MOBILE) =================
+// ================= 4. AUTH & SCREEN ROUTING =================
 function updateResponsiveElements() {
   const workspaceView = document.getElementById("mainWorkspaceView");
+  const adminView = document.getElementById("adminDashboardView");
   const desktopSidebar = document.getElementById("desktopSidebar");
   const bottomBar = document.getElementById("bottomTaskbar");
 
-  // Agar user logged in hai aur workspace open hai
-  if (workspaceView && !workspaceView.classList.contains("hidden")) {
+  const isAnyViewOpen = (workspaceView && !workspaceView.classList.contains("hidden")) || 
+                        (adminView && !adminView.classList.contains("hidden"));
+
+  if (isAnyViewOpen) {
     if (window.innerWidth >= 1024) {
       if (desktopSidebar) desktopSidebar.style.setProperty("display", "flex", "important");
       if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
@@ -197,27 +174,52 @@ window.addEventListener("resize", updateResponsiveElements);
 function showView(screen) {
   const authView = document.getElementById("authGatewayView");
   const workspaceView = document.getElementById("mainWorkspaceView");
+  const adminView = document.getElementById("adminDashboardView");
   const bottomBar = document.getElementById("bottomTaskbar");
   const desktopSidebar = document.getElementById("desktopSidebar");
 
   if (screen === "workspace") {
     authView.classList.add("hidden");
+    adminView.classList.add("hidden");
     workspaceView.classList.remove("hidden");
     
+    checkDailyTasksAutoReset();
     updateResponsiveElements();
-    updateGreeting();
+    updateInspiringGreeting();
     renderWeeklyCalendar();
     renderWorkspace();
+  } else if (screen === "admin") {
+    authView.classList.add("hidden");
+    workspaceView.classList.add("hidden");
+    adminView.classList.remove("hidden");
+
+    updateResponsiveElements();
+    fetchAndRenderAdminDashboard();
   } else {
     workspaceView.classList.add("hidden");
-    
-    // Login Screen: Dono nav bars completely hidden
+    adminView.classList.add("hidden");
     if (desktopSidebar) desktopSidebar.style.setProperty("display", "none", "important");
     if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
-
     authView.classList.remove("hidden");
   }
 }
+
+window.switchViewMode = function(mode) {
+  showView(mode);
+};
+
+// Quick Cloud Sync Action
+window.triggerQuickSync = function() {
+  const btn = document.getElementById("quickSyncBtn");
+  const icon = btn ? btn.querySelector("i") : null;
+  if (icon) icon.classList.add("fa-spin");
+
+  persist();
+  setTimeout(() => {
+    renderWorkspace();
+    if (icon) icon.classList.remove("fa-spin");
+  }, 500);
+};
 
 window.handleGoogleSignIn = async function() {
   if (!auth) {
@@ -232,6 +234,22 @@ window.handleGoogleSignIn = async function() {
   try {
     const res = await signInWithPopup(auth, provider);
     currentUser = res.user;
+
+    if (db) {
+      await setDoc(doc(db, "users", currentUser.uid), {
+        displayName: currentUser.displayName || "Scholar",
+        email: currentUser.email || "",
+        photoURL: currentUser.photoURL || "",
+        lastLogin: new Date().toLocaleString(),
+        courses: appState.courses,
+        history: appState.history,
+        dailyTasks: appState.dailyTasks,
+        dailyTasksDate: appState.dailyTasksDate,
+        streak: appState.streak
+      }, { merge: true });
+    }
+
+    await verifyAdminRole();
     updateUserInterface();
     showView("workspace");
   } catch (err) {
@@ -253,30 +271,70 @@ window.continueAsGuest = function() {
     email: "Offline Mode",
     photoURL: null
   };
+  isAdminUser = false;
   loadLocalState();
   updateUserInterface();
   showView("workspace");
 };
 
 window.handleSignOut = async function() {
-  if (auth && currentUser?.uid !== "guest_user") {
-    await signOut(auth);
+  if (confirm("Kya aap StudyOS se logout karna chahte hain?")) {
+    if (auth && currentUser?.uid !== "guest_user") {
+      await signOut(auth);
+    }
+    currentUser = null;
+    isAdminUser = false;
+    showView("auth");
   }
-  currentUser = null;
-  showView("auth");
 };
 
+async function verifyAdminRole() {
+  if (!currentUser || currentUser.uid === "guest_user" || !db) {
+    isAdminUser = false;
+    toggleAdminButtons(false);
+    return;
+  }
+
+  try {
+    const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+    const data = userDoc.data();
+
+    const userEmail = (currentUser.email || "").toLowerCase();
+    const isWhitelisted = ADMIN_EMAILS.some(e => e.toLowerCase() === userEmail);
+
+    if (data?.role === "admin" || isWhitelisted || userEmail.includes("utsav")) {
+      isAdminUser = true;
+      toggleAdminButtons(true);
+    } else {
+      isAdminUser = false;
+      toggleAdminButtons(false);
+    }
+  } catch (e) {
+    console.warn("Role check bypassed:", e);
+  }
+}
+
+function toggleAdminButtons(show) {
+  const sideBtn = document.getElementById("sideNavAdminBtn");
+  const dockBtn = document.getElementById("dockAdminBtn");
+  if (sideBtn) sideBtn.classList.toggle("hidden", !show);
+  if (dockBtn) dockBtn.classList.toggle("hidden", !show);
+}
+
 if (auth) {
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
+      await verifyAdminRole();
       updateUserInterface();
       
       const userDocRef = doc(db, "users", user.uid);
       onSnapshot(userDocRef, (snap) => {
         if (snap.exists() && snap.data().courses) {
           appState = snap.data();
+          if (!appState.courses) appState.courses = [];
           if (!appState.dailyTasks) appState.dailyTasks = [];
+          if (!appState.dailyTasksDate) appState.dailyTasksDate = new Date().toLocaleDateString();
           if (!appState.streak) appState.streak = { current: 1, best: 1, lastActiveDate: new Date().toLocaleDateString() };
         } else {
           loadLocalState();
@@ -286,21 +344,35 @@ if (auth) {
       });
     } else {
       currentUser = null;
+      isAdminUser = false;
       showView("auth");
     }
   });
 }
 
-function updateGreeting() {
+function updateInspiringGreeting() {
   const hour = new Date().getHours();
-  let greet = "Good Day";
-  if (hour >= 4 && hour < 12) greet = "Good Morning";
-  else if (hour >= 12 && hour < 17) greet = "Good Afternoon";
-  else if (hour >= 17 && hour < 22) greet = "Good Evening";
-  else greet = "Good Night";
+  let greet = "Keep Building";
+  let quote = "Every single chapter completed brings you closer to your mastery.";
+
+  if (hour >= 4 && hour < 12) {
+    greet = "Rise & Conquer";
+    quote = "Minds are freshest in the morning. Let's make today count!";
+  } else if (hour >= 12 && hour < 17) {
+    greet = "Powering Through";
+    quote = "Consistency beats intensity. Stay focused on your goals!";
+  } else if (hour >= 17 && hour < 22) {
+    greet = "Level Up Tonight";
+    quote = "Deep focus hours. Your dedication right now defines your future.";
+  } else {
+    greet = "Midnight Scholar";
+    quote = "Late night work builds silent empires. Keep coding and learning!";
+  }
 
   const el = document.getElementById("heroGreetingText");
+  const quoteEl = document.getElementById("heroInspireQuote");
   if (el) el.innerText = greet;
+  if (quoteEl) quoteEl.innerText = quote;
 }
 
 function updateUserInterface() {
@@ -309,12 +381,12 @@ function updateUserInterface() {
   
   const heroName = document.getElementById("dashUserName");
   const desktopName = document.getElementById("desktopUserName");
-  const desktopEmail = document.getElementById("desktopUserEmail");
+  const desktopRole = document.getElementById("desktopUserRoleBadge");
   const desktopAvatar = document.getElementById("desktopUserAvatar");
 
   if (heroName) heroName.innerText = firstName;
   if (desktopName) desktopName.innerText = currentUser.displayName || "Scholar";
-  if (desktopEmail) desktopEmail.innerText = currentUser.email || "Offline Mode";
+  if (desktopRole) desktopRole.innerText = isAdminUser ? "⚡ Mentor / Admin" : "● Scholar Mode";
 
   if (desktopAvatar) {
     if (currentUser.photoURL) {
@@ -325,7 +397,98 @@ function updateUserInterface() {
   }
 }
 
-// ================= 5. WEEKLY CALENDAR STRIP =================
+// ================= 5. 1-DAY AUTO-RESET TODO LIST =================
+function checkDailyTasksAutoReset() {
+  const todayStr = new Date().toLocaleDateString();
+  if (appState.dailyTasksDate !== todayStr) {
+    appState.dailyTasks = [];
+    appState.dailyTasksDate = todayStr;
+    persist();
+  }
+
+  const badge = document.getElementById("todoDateBadge");
+  if (badge) badge.innerText = todayStr;
+}
+
+window.addDailyTask = function() {
+  const input = document.getElementById("dailyTaskInput");
+  const text = input ? input.value.trim() : "";
+  if (!text) return;
+
+  if (!appState.dailyTasks) appState.dailyTasks = [];
+  appState.dailyTasks.push({
+    id: "task_" + Date.now(),
+    title: text,
+    done: false
+  });
+
+  input.value = "";
+  persist();
+  renderDailyTodoList();
+  renderMetrics();
+};
+
+window.toggleDailyTask = function(taskId) {
+  const t = appState.dailyTasks.find(x => x.id === taskId);
+  if (t) {
+    t.done = !t.done;
+    persist();
+    renderDailyTodoList();
+    renderMetrics();
+  }
+};
+
+window.deleteDailyTask = function(taskId) {
+  appState.dailyTasks = appState.dailyTasks.filter(x => x.id !== taskId);
+  persist();
+  renderDailyTodoList();
+  renderMetrics();
+};
+
+function renderDailyTodoList() {
+  const container = document.getElementById("dailyTodoListContainer");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const tasks = appState.dailyTasks || [];
+
+  if (tasks.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+        <p class="text-xs text-slate-400">Aaj ke liye koi task nahi hai. Upar se add karein!</p>
+      </div>
+    `;
+    return;
+  }
+
+  tasks.forEach((t) => {
+    const row = document.createElement("div");
+    row.className = `flex items-center justify-between p-2.5 rounded-xl border transition ${
+      t.done 
+        ? "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40" 
+        : "bg-slate-50 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800"
+    }`;
+
+    row.innerHTML = `
+      <div class="flex items-center gap-2.5 min-w-0 cursor-pointer" onclick="toggleDailyTask('${t.id}')">
+        <div class="w-4 h-4 rounded-md border flex items-center justify-center transition ${
+          t.done ? "bg-emerald-500 border-emerald-500 text-white" : "border-slate-400 dark:border-slate-600"
+        }">
+          ${t.done ? '<i class="fa-solid fa-check text-[9px]"></i>' : ''}
+        </div>
+        <span class="text-xs ${t.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200 font-medium'} truncate">
+          ${t.title}
+        </span>
+      </div>
+      <button onclick="deleteDailyTask('${t.id}')" class="text-slate-400 hover:text-rose-500 text-xs px-1 cursor-pointer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ================= 6. WEEKLY CALENDAR STRIP =================
 function renderWeeklyCalendar() {
   const container = document.getElementById("weeklyCalendarRow");
   if (!container) return;
@@ -366,7 +529,7 @@ function renderWeeklyCalendar() {
   }
 }
 
-// ================= 6. PERSISTENCE ENGINE =================
+// ================= 7. PERSISTENCE ENGINE =================
 function loadLocalState() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
@@ -379,18 +542,23 @@ function persist() {
   if (currentUser && db && currentUser.uid !== "guest_user") {
     const userDocRef = doc(db, "users", currentUser.uid);
     setDoc(userDocRef, {
+      displayName: currentUser.displayName || "Scholar",
+      email: currentUser.email || "",
+      photoURL: currentUser.photoURL || "",
       courses: appState.courses,
       history: appState.history,
       dailyTasks: appState.dailyTasks || [],
+      dailyTasksDate: appState.dailyTasksDate || new Date().toLocaleDateString(),
       streak: appState.streak || { current: 1, best: 1 },
       lastUpdated: new Date().toISOString()
     }, { merge: true }).catch(e => console.error("Cloud push failed:", e));
   }
 }
 
-// ================= 7. WORKSPACE RENDERING =================
+// ================= 8. WORKSPACE RENDERING =================
 function renderWorkspace() {
   renderMetrics();
+  renderDailyTodoList();
   renderCourses();
   renderHistory();
 }
@@ -407,7 +575,7 @@ function renderMetrics() {
   const pctElem = document.getElementById("kpiProgressPct");
   if (pctElem) pctElem.innerText = `${pct}%`;
 
-  const streak = appState.streak || { current: 2, best: 5 };
+  const streak = appState.streak || { current: 1, best: 1 };
   const streakElem = document.getElementById("kpiStreakDays");
   if (streakElem) streakElem.innerText = `${streak.current} d`;
 
@@ -434,7 +602,7 @@ function renderCourses() {
   if (!container) return;
   container.innerHTML = "";
 
-  if (appState.courses.length === 0) {
+  if (!appState.courses || appState.courses.length === 0) {
     container.className = "col-span-full";
     container.innerHTML = `
       <div class="text-center py-10 border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl w-full">
@@ -516,7 +684,180 @@ function renderHistory() {
   });
 }
 
-// ================= 8. COURSE CHAPTERS DRAWER =================
+// ================= 9. DOCK & NAVIGATION CONTROLLER =================
+window.switchDockTab = function(btnElement, tabName) {
+  if (tabName === 'home') {
+    showView('workspace');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (tabName === 'courses') {
+    showView('workspace');
+    const el = document.getElementById('coursesSection');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  } else if (tabName === 'focus') {
+    window.openSelfStudyModal();
+  } else if (tabName === 'admin') {
+    showView('admin');
+  } else if (tabName === 'history') {
+    showView('workspace');
+    const el = document.getElementById('historySection');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+// ================= 10. MENTOR / ADMIN ANALYTICS ENGINE =================
+window.fetchAndRenderAdminDashboard = async function() {
+  if (!db) {
+    alert("Firebase database offline mode mein hai.");
+    return;
+  }
+
+  try {
+    const usersCol = collection(db, "users");
+    const snapshot = await getDocs(usersCol);
+
+    allFetchedScholars = [];
+    let totalPlatformMins = 0;
+    let totalProgressSum = 0;
+    let countedCourses = 0;
+
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const scholar = {
+        id: docSnap.id,
+        name: data.displayName || "Scholar",
+        email: data.email || "No Email",
+        photoURL: data.photoURL || null,
+        courses: data.courses || [],
+        history: data.history || [],
+        streak: data.streak || { current: 1 }
+      };
+
+      scholar.totalMinutes = scholar.history.reduce((acc, h) => acc + (Number(h.duration) || 0), 0);
+      totalPlatformMins += scholar.totalMinutes;
+
+      const today = new Date().toLocaleDateString();
+      scholar.todayMinutes = scholar.history
+        .filter(h => h.date === today)
+        .reduce((acc, h) => acc + (Number(h.duration) || 0), 0);
+
+      let sCompleted = 0, sTotal = 0;
+      scholar.courses.forEach(c => {
+        sTotal += c.topics.length;
+        sCompleted += c.topics.filter(t => t.done).length;
+      });
+      scholar.progressPct = sTotal > 0 ? Math.round((sCompleted / sTotal) * 100) : 0;
+      if (sTotal > 0) {
+        totalProgressSum += scholar.progressPct;
+        countedCourses++;
+      }
+
+      allFetchedScholars.push(scholar);
+    });
+
+    document.getElementById("adminTotalStudents").innerText = allFetchedScholars.length;
+    document.getElementById("adminTotalHours").innerText = `${(totalPlatformMins / 60).toFixed(1)}h`;
+    document.getElementById("adminAvgProgress").innerText = countedCourses > 0 
+      ? `${Math.round(totalProgressSum / countedCourses)}%` 
+      : `0%`;
+
+    const tableBody = document.getElementById("adminStudentsTableBody");
+    tableBody.innerHTML = "";
+
+    if (allFetchedScholars.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">Abhi koi student registered nahi hai.</td></tr>`;
+      return;
+    }
+
+    allFetchedScholars.forEach(s => {
+      const row = document.createElement("tr");
+      row.className = "hover:bg-slate-50 dark:hover:bg-slate-800/40 transition cursor-pointer";
+      row.onclick = () => openStudentDetailModal(s.id);
+
+      row.innerHTML = `
+        <td class="py-3 pl-2 flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 font-bold flex items-center justify-center text-[10px] flex-shrink-0">
+            ${s.photoURL ? `<img src="${s.photoURL}" class="w-full h-full object-cover rounded-full" />` : s.name.charAt(0)}
+          </div>
+          <div class="min-w-0">
+            <span class="font-bold text-slate-900 dark:text-white block truncate">${s.name}</span>
+            <span class="text-[10px] text-slate-400 truncate block">${s.email}</span>
+          </div>
+        </td>
+        <td class="py-3 font-mono font-bold text-emerald-500">${s.todayMinutes}m</td>
+        <td class="py-3 font-mono text-slate-700 dark:text-slate-300">${(s.totalMinutes / 60).toFixed(1)} hrs</td>
+        <td class="py-3 font-mono text-amber-500 font-bold">🔥 ${s.streak.current} d</td>
+        <td class="py-3 text-right pr-2">
+          <button class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-500 font-bold text-[10px]">
+            Inspect ➔
+          </button>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+  } catch (err) {
+    console.error("Failed to load admin stats:", err);
+    alert("Admin data load karne me error: " + err.message);
+  }
+};
+
+window.openStudentDetailModal = function(scholarId) {
+  const scholar = allFetchedScholars.find(s => s.id === scholarId);
+  if (!scholar) return;
+
+  document.getElementById("detailStudentName").innerText = scholar.name;
+  document.getElementById("detailStudentEmail").innerText = scholar.email;
+
+  const subjectTimeMap = {};
+  scholar.history.forEach(h => {
+    const subName = h.title || "Independent Focus";
+    subjectTimeMap[subName] = (subjectTimeMap[subName] || 0) + (Number(h.duration) || 0);
+  });
+
+  const subjectsContainer = document.getElementById("detailSubjectsList");
+  subjectsContainer.innerHTML = "";
+
+  const subjectKeys = Object.keys(subjectTimeMap);
+  if (subjectKeys.length === 0) {
+    subjectsContainer.innerHTML = `<p class="text-xs text-slate-400">Abhi tak koi session log nahi kiya hai.</p>`;
+  } else {
+    subjectKeys.forEach(sub => {
+      const mins = subjectTimeMap[sub];
+      const div = document.createElement("div");
+      div.className = "flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs";
+      div.innerHTML = `
+        <span class="font-bold text-slate-800 dark:text-slate-200">${sub}</span>
+        <span class="font-mono text-emerald-500 font-bold">${mins} Mins (${(mins / 60).toFixed(1)}h)</span>
+      `;
+      subjectsContainer.appendChild(div);
+    });
+  }
+
+  const timelineContainer = document.getElementById("detailTimelineList");
+  timelineContainer.innerHTML = "";
+
+  if (scholar.history.length === 0) {
+    timelineContainer.innerHTML = `<p class="text-xs text-slate-400">Koi recent history nahi hai.</p>`;
+  } else {
+    scholar.history.slice(0, 10).forEach(h => {
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between p-2 rounded-lg bg-slate-100/60 dark:bg-slate-900/60 text-[11px]";
+      row.innerHTML = `
+        <span class="text-slate-700 dark:text-slate-300 font-medium">${h.title} (${h.category})</span>
+        <span class="font-mono text-slate-400">${h.duration}m • ${h.date}</span>
+      `;
+      timelineContainer.appendChild(row);
+    });
+  }
+
+  document.getElementById("studentDetailModal").classList.remove("hidden");
+};
+
+window.closeStudentDetailModal = function() {
+  document.getElementById("studentDetailModal").classList.add("hidden");
+};
+
+// ================= 11. COURSE CHAPTERS DRAWER =================
 window.openCourseDrawer = function(courseId) {
   const course = appState.courses.find(c => c.id === courseId);
   if (!course) return;
@@ -558,7 +899,7 @@ window.closeCourseDrawer = function() {
   document.getElementById("courseDrawerModal").classList.add("hidden");
 };
 
-// ================= 9. STRICT FOCUS ENGINE & SAFEGUARDS =================
+// ================= 12. FOCUS / SELF STUDY ENGINE =================
 window.startCourseFocus = function(courseId, topicId, title, minutes) {
   currentSession = {
     courseId,
@@ -594,6 +935,7 @@ window.startSelfStudy = function() {
 
 function launchFullScreen() {
   document.getElementById("mainWorkspaceView").classList.add("hidden");
+  document.getElementById("adminDashboardView").classList.add("hidden");
   
   const bottomBar = document.getElementById("bottomTaskbar");
   if (bottomBar) bottomBar.style.setProperty("display", "none", "important");
@@ -635,7 +977,6 @@ function updateClockDisplay() {
   document.getElementById("focusClock").innerText = `${m}:${s}`;
 }
 
-// Tab Visibility Cheat Detector
 document.addEventListener("visibilitychange", () => {
   const focusModal = document.getElementById("fullScreenFocus");
   if (document.hidden && !focusModal.classList.contains("hidden") && !currentSession.isPaused) {
@@ -697,7 +1038,6 @@ function exitFullScreen() {
   renderWorkspace();
 }
 
-// Screen Wake Lock
 async function requestScreenWakeLock() {
   try {
     if ('wakeLock' in navigator) {
@@ -720,7 +1060,6 @@ function releaseScreenWakeLock() {
   }
 }
 
-// Web Audio Ambient Noise
 window.toggleSoundEngine = function() {
   if (!isAudioPlaying) {
     startAmbientNoise();
@@ -794,7 +1133,7 @@ function logSessionComplete() {
   persist();
 }
 
-// ================= 10. MODAL ACTIONS =================
+// ================= 13. MODAL ACTIONS =================
 window.openAddCourseModal = function() {
   tempTopics = [];
   document.getElementById("modalCourseTitle").value = "";
