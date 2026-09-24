@@ -17,8 +17,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ================= ADMIN CONFIGURATION =================
+// Yahan apni exact admin login email rakhein
 const ADMIN_EMAILS = [
-  "admin@studyos.com" // Yahan apni exact admin Gmail ID add kar sakte hain
+  "utsavkushwaha4@gmail.com"
 ];
 
 // ================= 1. FIREBASE SETUP =================
@@ -57,10 +58,10 @@ try {
 const STORAGE_KEY = "study_os_app_state_v7";
 
 let appState = {
-  courses: [], // Empty initially for user to add
+  courses: [],
   history: [],
   dailyTasks: [],
-  dailyTasksDate: new Date().toLocaleDateString(), // Tracks 1-day auto-reset
+  dailyTasksDate: new Date().toLocaleDateString(),
   streak: {
     current: 1,
     best: 1,
@@ -189,6 +190,11 @@ function showView(screen) {
     renderWeeklyCalendar();
     renderWorkspace();
   } else if (screen === "admin") {
+    if (!isAdminUser) {
+      alert("Unauthorized access. Admin role required.");
+      showView("workspace");
+      return;
+    }
     authView.classList.add("hidden");
     workspaceView.classList.add("hidden");
     adminView.classList.remove("hidden");
@@ -272,6 +278,7 @@ window.continueAsGuest = function() {
     photoURL: null
   };
   isAdminUser = false;
+  toggleAdminButtons(false); // Guest ke liye strictly hide
   loadLocalState();
   updateUserInterface();
   showView("workspace");
@@ -284,6 +291,7 @@ window.handleSignOut = async function() {
     }
     currentUser = null;
     isAdminUser = false;
+    toggleAdminButtons(false);
     showView("auth");
   }
 };
@@ -295,14 +303,20 @@ async function verifyAdminRole() {
     return;
   }
 
+  const userEmail = (currentUser.email || "").toLowerCase().trim();
+  const isWhitelisted = ADMIN_EMAILS.some(e => e.toLowerCase().trim() === userEmail);
+
+  if (isWhitelisted) {
+    isAdminUser = true;
+    toggleAdminButtons(true);
+    return;
+  }
+
   try {
     const userDoc = await getDoc(doc(db, "users", currentUser.uid));
     const data = userDoc.data();
 
-    const userEmail = (currentUser.email || "").toLowerCase();
-    const isWhitelisted = ADMIN_EMAILS.some(e => e.toLowerCase() === userEmail);
-
-    if (data?.role === "admin" || isWhitelisted || userEmail.includes("utsav")) {
+    if (data?.role === "admin") {
       isAdminUser = true;
       toggleAdminButtons(true);
     } else {
@@ -310,15 +324,31 @@ async function verifyAdminRole() {
       toggleAdminButtons(false);
     }
   } catch (e) {
-    console.warn("Role check bypassed:", e);
+    console.warn("Role check error:", e);
+    isAdminUser = false;
+    toggleAdminButtons(false);
   }
 }
 
 function toggleAdminButtons(show) {
   const sideBtn = document.getElementById("sideNavAdminBtn");
   const dockBtn = document.getElementById("dockAdminBtn");
-  if (sideBtn) sideBtn.classList.toggle("hidden", !show);
-  if (dockBtn) dockBtn.classList.toggle("hidden", !show);
+  
+  if (sideBtn) {
+    if (show) {
+      sideBtn.classList.remove("hidden");
+    } else {
+      sideBtn.classList.add("hidden");
+    }
+  }
+  
+  if (dockBtn) {
+    if (show) {
+      dockBtn.classList.remove("hidden");
+    } else {
+      dockBtn.classList.add("hidden");
+    }
+  }
 }
 
 if (auth) {
@@ -345,6 +375,7 @@ if (auth) {
     } else {
       currentUser = null;
       isAdminUser = false;
+      toggleAdminButtons(false);
       showView("auth");
     }
   });
